@@ -1,0 +1,11 @@
+[package]
+name = "zipno"
+version = "0.1.0"
+authors = ["biluohc <biluohc@qq.com>"]
+
+[dependencies]
+zip = "^0.2.1"
+encoding = "^0.2"
+
+stderr ="^0.7.0"
+poolite ="^0.5.3"
