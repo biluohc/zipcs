@@ -31,7 +31,7 @@ fn main() {
     };
 
     for zip_arch_path in &args[1..] {
-        if let Err(e) = for_zip_arch_file(&zip_arch_path) {
+        if let Err(e) = for_zip_arch_file(zip_arch_path) {
             errln!("Err({:?})", e);
             exit(1);
         }
@@ -42,8 +42,8 @@ fn for_zip_arch_file(zip_arch_path: &str) -> Result<(), ZipNoError> {
     let reader = BufReader::new(zip_arch);
     let mut zip_arch = ZipArchive::new(reader)?;
 
-    let mut map: HashMap<usize, String> = HashMap::new();
-    let pool = Pool::new().max(Pool::num_cpus() + 1).run().unwrap();
+    let mut map_file: HashMap<usize, String> = HashMap::new();
+    let pool = Pool::new().run().unwrap();
     for i in 0..zip_arch.len() {
         let file = zip_arch.by_index(i).unwrap();
         let name = {
@@ -55,21 +55,19 @@ fn for_zip_arch_file(zip_arch_path: &str) -> Result<(), ZipNoError> {
                 file.name().to_owned()
             }
         };
-
-        println!("${}->{:?}: {}", i, name, file.size());
-
-        if name.ends_with("/") {
-            create_dir_all(name)?;
+        if name.ends_with('/') {
+            pool.spawn(Box::new(move || { unzipdir_matchres(i, name); }));
         } else {
-            map.insert(i, name);
+            map_file.insert(i, name);
         }
     }
-    let zip_arch_mutex = Arc::new(Mutex::new(zip_arch));
-    for (i, name) in map.iter() {
-        let zip_arch_mutex = zip_arch_mutex.clone();
+    let zip_arch = Arc::new(Mutex::new(zip_arch));
+
+    for (i, name) in &map_file {
+        let zip_arch = zip_arch.clone();
         let name = name.to_string();
-        let i=i.clone();
-        pool.spawn(Box::new(move|| unzipfile_matchres(zip_arch_mutex, i, name)));
+        let i = *i;
+        pool.spawn(Box::new(move || { unzipfile_matchres(zip_arch, i, name); }));
     }
 
     loop {
@@ -81,6 +79,19 @@ fn for_zip_arch_file(zip_arch_path: &str) -> Result<(), ZipNoError> {
     Ok(())
 }
 
+fn unzipdir_matchres(i: usize, name: String) {
+    if let Err(e) = unzipdir(i, &name) {
+        errln!("Unzip `${}->{}` fails: {:?}", i, name, e);
+    }
+}
+
+#[inline]
+fn unzipdir(i: usize, name: &str) -> Result<(), ZipNoError> {
+    println!("${}->{:?}", i, name);
+    create_dir_all(name)?;
+    Ok(())
+}
+
 fn unzipfile_matchres<R: Read + io::Seek>(zip_arch: Arc<Mutex<ZipArchive<R>>>, i: usize, name: String) {
     if let Err(e) = unzipfile(zip_arch, i, &name) {
         errln!("Unzip `${}->{}` fails: {:?}", i, name, e);
@@ -88,14 +99,15 @@ fn unzipfile_matchres<R: Read + io::Seek>(zip_arch: Arc<Mutex<ZipArchive<R>>>, i
 }
 
 #[inline]
-fn unzipfile<R: Read + io::Seek>(zip_arch: Arc<Mutex<ZipArchive<R>>>, i: usize, name: &String) -> Result<(), ZipNoError> {
+fn unzipfile<R: Read + io::Seek>(zip_arch: Arc<Mutex<ZipArchive<R>>>, i: usize, name: &str) -> Result<(), ZipNoError> {
     let mut zip_arch = zip_arch.lock().unwrap();
     let mut zip = zip_arch.by_index(i)?;
+
+    println!("${}->{:?}: {}", i, name, zip.size());
     let mut outfile = File::create(name)?;
     copy(&mut zip, &mut outfile)?;
     Ok(())
 }
-
 
 #[derive(Debug)]
 enum ZipNoError {
