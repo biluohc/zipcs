@@ -1,18 +1,10 @@
 #[macro_use]
 extern crate stderr;
-extern crate poolite;
-use poolite::Pool;
 
 use std::fs::{File, create_dir_all};
 use std::io::{copy, BufReader};
-use std::time::Duration;
-use std::env::args;
 use std::process::exit;
-use std::thread;
-use std::sync::{Arc, Mutex};
-use std::collections::HashMap;
-use std::io;
-use std::io::prelude::*;
+use std::env::args;
 
 extern crate encoding;
 use encoding::{Encoding, DecoderTrap};
@@ -20,7 +12,7 @@ use encoding::all::{GB18030, BIG5_2003};
 
 extern crate zip;
 use zip::read::ZipArchive;
-// use zip::read::ZipFile;
+use zip::read::ZipFile;
 
 fn main() {
     println!("Hello, Zipno !");
@@ -42,10 +34,8 @@ fn for_zip_arch_file(zip_arch_path: &str) -> Result<(), ZipNoError> {
     let reader = BufReader::new(zip_arch);
     let mut zip_arch = ZipArchive::new(reader)?;
 
-    let mut map_file: HashMap<usize, String> = HashMap::new();
-    let pool = Pool::new().run().unwrap();
     for i in 0..zip_arch.len() {
-        let file = zip_arch.by_index(i).unwrap();
+        let file = zip_arch.by_index(i)?;
         let name = {
             if let Ok(o) = GB18030.decode(file.name_raw(), DecoderTrap::Strict) {
                 o
@@ -55,55 +45,20 @@ fn for_zip_arch_file(zip_arch_path: &str) -> Result<(), ZipNoError> {
                 file.name().to_owned()
             }
         };
+
         if name.ends_with('/') {
-            pool.spawn(Box::new(move || { unzipdir_matchres(i, name); }));
+            println!("${}->{:?}", i, name);
+            create_dir_all(name)?;
         } else {
-            map_file.insert(i, name);
-        }
-    }
-    let zip_arch = Arc::new(Mutex::new(zip_arch));
-
-    for (i, name) in &map_file {
-        let zip_arch = zip_arch.clone();
-        let name = name.to_string();
-        let i = *i;
-        pool.spawn(Box::new(move || { unzipfile_matchres(zip_arch, i, name); }));
-    }
-
-    loop {
-        thread::sleep(Duration::from_millis(100)); //wait for the pool 100ms.
-        if pool.is_empty() {
-            break;
+            println!("${}->{:?}: {}", i, name, file.size());
+            unzipfile(file, name)?;
         }
     }
     Ok(())
 }
 
-fn unzipdir_matchres(i: usize, name: String) {
-    if let Err(e) = unzipdir(i, &name) {
-        errln!("Unzip `${}->{}` fails: {:?}", i, name, e);
-    }
-}
-
 #[inline]
-fn unzipdir(i: usize, name: &str) -> Result<(), ZipNoError> {
-    println!("${}->{:?}", i, name);
-    create_dir_all(name)?;
-    Ok(())
-}
-
-fn unzipfile_matchres<R: Read + io::Seek>(zip_arch: Arc<Mutex<ZipArchive<R>>>, i: usize, name: String) {
-    if let Err(e) = unzipfile(zip_arch, i, &name) {
-        errln!("Unzip `${}->{}` fails: {:?}", i, name, e);
-    }
-}
-
-#[inline]
-fn unzipfile<R: Read + io::Seek>(zip_arch: Arc<Mutex<ZipArchive<R>>>, i: usize, name: &str) -> Result<(), ZipNoError> {
-    let mut zip_arch = zip_arch.lock().unwrap();
-    let mut zip = zip_arch.by_index(i)?;
-
-    println!("${}->{:?}: {}", i, name, zip.size());
+fn unzipfile(mut zip: ZipFile, name: String) -> Result<(), ZipNoError> {
     let mut outfile = File::create(name)?;
     copy(&mut zip, &mut outfile)?;
     Ok(())
