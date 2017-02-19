@@ -16,7 +16,7 @@ pub struct Config {
 
 impl Config {
     pub fn get() -> Result<Config, String> {
-        let charsets = format!("Sets the charset Zipcs using{}",
+        let charsets = format!("Sets the charset Zipcs using({})",
                                CHARSETS.replace("_", "-").to_lowercase());
         let app = App::new(NAME)
         .version(VERSION)
@@ -26,7 +26,7 @@ impl Config {
         .flag(Flag::new("list")
             .short("l")
             .long("list")
-            .help("Only list files from archives"))
+            .help("Only list files from ZipArchives"))
         .opt(Opt::new("log")
             .long("log")
             .short("log")

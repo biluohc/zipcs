@@ -9,7 +9,7 @@ pub const URL_NAME: &'static str = "Repository";
 pub const URL: &'static str = "https://github.com/biluohc/zipcs";
 
 // copy form use@line16 ,but BIG5_2003 is swap by big5.
-pub const CHARSETS: &'static str = "(UTF_8, UTF_16BE, UTF_16LE, GBK, GB18030, HZ, BIG5)";
+pub const CHARSETS: &'static str = "UTF_8, UTF_16BE, UTF_16LE, GBK, GB18030, HZ, BIG5";
 
 // charset.downcase() to handle
 // https://docs.rs/encoding/0.2.33/encoding/all/index.html

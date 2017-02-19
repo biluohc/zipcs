@@ -4,7 +4,7 @@ extern crate stderr;
 use stderr::Loger;
 
 extern crate poolite;
-use poolite::Pool;
+use poolite::{Pool, IntoPool};
 
 extern crate encoding;
 extern crate zip;
@@ -30,10 +30,8 @@ use args::{Config, Task};
 
 fn main() {
     init!();
-    println!("Hi, {} v{} !", NAME, VERSION);
-
     if let Err(e) = fun() {
-        errln!("{}_Error: {}", NAME, e);
+        errln!("{}_Error: {}", NAME, &e);
         assert_ne!("", e.trim());
         exit(1);
     };
@@ -41,16 +39,20 @@ fn main() {
 fn fun() -> Result<(), String> {
     let config = Rc::from(Config::get()?);
     dbln!("Config::get(): {:?}", config);
+    let pool = match *config.task() {
+        Task::LIST => Pool::new(),
+        Task::UNZIP => Pool::new().min(0).run().into_pool(),
+    };
     for zip_arch_path in config.zips() {
         let config = config.clone();
-        if let Err(e) = for_zip_arch_file(zip_arch_path, config) {
+        if let Err(e) = for_zip_arch_file(&pool, zip_arch_path, config) {
             return Err(format!("{:?}->{:?}", zip_arch_path, e));
         }
     }
     Ok(())
 }
 
-fn for_zip_arch_file(zip_arch_path: &str, config: Rc<Config>) -> Result<(), ZipCSError> {
+fn for_zip_arch_file(pool: &Pool, zip_arch_path: &str, config: Rc<Config>) -> Result<(), ZipCSError> {
     let zip_arch = File::open(zip_arch_path)?;
     let reader = BufReader::new(zip_arch);
     let mut zip_arch = ZipArchive::new(reader)?;
@@ -63,7 +65,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: Rc<Config>) -> Result<(), ZipC
         let file = match zip_arch.by_index(i) {
             Ok(o) => o,
             Err(e) => {
-                errln!("{}_Error: {:?}'s{:?}->{:?}", NAME, zip_arch_path, i, e);
+                errln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
                 continue;
             }
         };
@@ -88,6 +90,14 @@ fn for_zip_arch_file(zip_arch_path: &str, config: Rc<Config>) -> Result<(), ZipC
         } else {
             println!("${}-> {:?}: {:?}", i, name, file.size());
             if config.task() == &Task::UNZIP {
+                {
+                    let path = Path::new(&name);
+                    if let Some(p) = path.parent() {
+                        if !p.exists() {
+                            create_dir_all(&p)?;
+                        }
+                    }
+                }
                 map.insert(i, name);
             }
         }
@@ -95,13 +105,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: Rc<Config>) -> Result<(), ZipC
     if config.task() == &Task::LIST {
         return Ok(());
     }
-    let mut pool = Pool::new();
-    let min = if map.len() < Pool::num_cpus() {
-        map.len()
-    } else {
-        Pool::num_cpus() + 1
-    };
-    pool = pool.min(min).run().unwrap();
+
     let zip_arch_mutex = Arc::new(Mutex::new(zip_arch));
     for (i, name) in &map {
         let zip_arch_mutex = zip_arch_mutex.clone();
