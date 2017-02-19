@@ -1,11 +1,31 @@
 [package]
-name = "zipno"
-version = "0.1.3"
+name = "zipcs"
+version = "0.2.0"
 authors = ["biluohc <biluohc@qq.com>"]
+description = "Unzip with charset setting."
+repository = "https://github.com/biluohc/zipcs"
+# documentation = "https://docs.rs/zipcs/"
+readme = "readme.md"
+keywords = ["unzip","charset","zip"]
+license = "MIT"
+
+[profile.dev]      #    cargo build 
+opt-level = 0     
+debug = true      
+panic = 'unwind'
+
+[profile.release]  #    cargo build --release
+opt-level = 3      #    cargo build --release -vv
+debug = false
+# debug = true 
+panic = 'abort' 
+# panic = 'unwind'
 
 [dependencies]
+app = {git = "https://github.com/biluohc/app-rs"}
 zip = "^0.2.1"
 encoding = "^0.2"
 
 stderr ="^0.7.0"
 poolite ="^0.5.3"
+

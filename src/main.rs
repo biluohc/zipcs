@@ -1,74 +1,113 @@
+extern crate app;
 #[macro_use]
 extern crate stderr;
+use stderr::Loger;
+
 extern crate poolite;
 use poolite::Pool;
 
-use std::fs::{File, create_dir_all};
-use std::io::{copy, BufReader};
-use std::time::Duration;
-use std::env::args;
-use std::process::exit;
-use std::thread;
-use std::sync::{Arc, Mutex};
-use std::collections::HashMap;
-use std::io;
-use std::io::prelude::*;
-
 extern crate encoding;
-use encoding::{Encoding, DecoderTrap};
-use encoding::all::{GB18030, BIG5_2003};
-
 extern crate zip;
 use zip::read::ZipArchive;
 // use zip::read::ZipFile;
 
+use std::fs::{File, create_dir_all};
+use std::io::{copy, BufReader};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
+use std::io::prelude::*;
+use std::process::exit;
+use std::path::Path;
+use std::rc::Rc;
+use std::thread;
+use std::io;
+
+mod consts;
+use consts::*;
+mod args;
+use args::{Config, Task};
+
 fn main() {
-    println!("Hello, Zipno !");
-    let args: Vec<String> = args().collect();
-    if args.len() == 1 {
-        errln!("No input ZipArchives: exit()");
+    init!();
+    println!("Hi, {} v{} !", NAME, VERSION);
+
+    if let Err(e) = fun() {
+        errln!("{}_Error: {}", NAME, e);
+        assert_ne!("", e.trim());
         exit(1);
     };
-
-    for zip_arch_path in &args[1..] {
-        if let Err(e) = for_zip_arch_file(zip_arch_path) {
-            errln!("Err({:?})", e);
-            exit(1);
+}
+fn fun() -> Result<(), String> {
+    let config = Rc::from(Config::get()?);
+    dbln!("Config::get(): {:?}", config);
+    for zip_arch_path in config.zips() {
+        let config = config.clone();
+        if let Err(e) = for_zip_arch_file(zip_arch_path, config) {
+            return Err(format!("{:?}->{:?}", zip_arch_path, e));
         }
     }
+    Ok(())
 }
-fn for_zip_arch_file(zip_arch_path: &str) -> Result<(), ZipNoError> {
+
+fn for_zip_arch_file(zip_arch_path: &str, config: Rc<Config>) -> Result<(), ZipCSError> {
     let zip_arch = File::open(zip_arch_path)?;
     let reader = BufReader::new(zip_arch);
     let mut zip_arch = ZipArchive::new(reader)?;
 
     let mut map: HashMap<usize, String> = HashMap::new();
-    let pool = Pool::new().max(Pool::num_cpus() + 1).run().unwrap();
+    if config.task() == &Task::UNZIP && !Path::new(config.outdir()).exists() {
+        create_dir_all(config.outdir())?;
+    }
     for i in 0..zip_arch.len() {
-        let file = zip_arch.by_index(i).unwrap();
-        let name = {
-            if let Ok(o) = GB18030.decode(file.name_raw(), DecoderTrap::Strict) {
-                o
-            } else if let Ok(o) = BIG5_2003.decode(file.name_raw(), DecoderTrap::Strict) {
+        let file = match zip_arch.by_index(i) {
+            Ok(o) => o,
+            Err(e) => {
+                errln!("{}_Error: {:?}'s{:?}->{:?}", NAME, zip_arch_path, i, e);
+                continue;
+            }
+        };
+        let mut name = {
+            if let Ok(o) = config.charset().u8slice_to_string(file.name_raw()) {
                 o
             } else {
                 file.name().to_owned()
             }
         };
+
+        name = match *config.task() {
+            Task::LIST => name,
+            Task::UNZIP => config.outdir().to_string() + &name,
+        };
+
         if name.ends_with('/') {
-            println!("${}->{:?}", i, name);            
-            create_dir_all(name)?;
+            println!("${}-> {:?}", i, name);
+            if config.task() == &Task::UNZIP {
+                create_dir_all(name)?;
+            }
         } else {
-            println!("${}->{:?}: {}", i, name, file.size());            
-            map.insert(i, name);
+            println!("${}-> {:?}: {:?}", i, name, file.size());
+            if config.task() == &Task::UNZIP {
+                map.insert(i, name);
+            }
         }
     }
+    if config.task() == &Task::LIST {
+        return Ok(());
+    }
+    let mut pool = Pool::new();
+    let min = if map.len() < Pool::num_cpus() {
+        map.len()
+    } else {
+        Pool::num_cpus() + 1
+    };
+    pool = pool.min(min).run().unwrap();
     let zip_arch_mutex = Arc::new(Mutex::new(zip_arch));
     for (i, name) in &map {
         let zip_arch_mutex = zip_arch_mutex.clone();
         let name = name.to_string();
-        let i=*i;
-        pool.spawn(Box::new(move|| unzipfile_matchres(zip_arch_mutex, i, name)));
+        let i = *i;
+        pool.spawn(Box::new(move || unzipfile_matchres(zip_arch_mutex, i, name)));
     }
 
     loop {
@@ -80,6 +119,7 @@ fn for_zip_arch_file(zip_arch_path: &str) -> Result<(), ZipNoError> {
     Ok(())
 }
 
+#[inline]
 fn unzipfile_matchres<R: Read + io::Seek>(zip_arch: Arc<Mutex<ZipArchive<R>>>, i: usize, name: String) {
     if let Err(e) = unzipfile(zip_arch, i, &name) {
         errln!("Unzip `${}->{}` fails: {:?}", i, name, e);
@@ -87,7 +127,7 @@ fn unzipfile_matchres<R: Read + io::Seek>(zip_arch: Arc<Mutex<ZipArchive<R>>>, i
 }
 
 #[inline]
-fn unzipfile<R: Read + io::Seek>(zip_arch: Arc<Mutex<ZipArchive<R>>>, i: usize, name: &str) -> Result<(), ZipNoError> {
+fn unzipfile<R: Read + io::Seek>(zip_arch: Arc<Mutex<ZipArchive<R>>>, i: usize, name: &str) -> Result<(), ZipCSError> {
     let mut zip_arch = zip_arch.lock().unwrap();
     let mut zip = zip_arch.by_index(i)?;
     let mut outfile = File::create(name)?;
@@ -95,18 +135,17 @@ fn unzipfile<R: Read + io::Seek>(zip_arch: Arc<Mutex<ZipArchive<R>>>, i: usize, 
     Ok(())
 }
 
-
 #[derive(Debug)]
-enum ZipNoError {
+enum ZipCSError {
     IO(std::io::Error),
     ZIP(zip::result::ZipError),
 }
 
-impl std::error::Error for ZipNoError {
+impl std::error::Error for ZipCSError {
     fn description(&self) -> &str {
         match *self {
-            ZipNoError::IO(ref e) => e.description(),
-            ZipNoError::ZIP(ref e) => e.description(),
+            ZipCSError::IO(ref e) => e.description(),
+            ZipCSError::ZIP(ref e) => e.description(),
         }
     }
 }
@@ -114,19 +153,19 @@ impl std::error::Error for ZipNoError {
 use std::fmt;
 use std::fmt::Formatter;
 
-impl fmt::Display for ZipNoError {
+impl fmt::Display for ZipCSError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "{}", self)
     }
 }
-impl From<std::io::Error> for ZipNoError {
+impl From<std::io::Error> for ZipCSError {
     fn from(e: std::io::Error) -> Self {
-        ZipNoError::IO(e)
+        ZipCSError::IO(e)
     }
 }
 
-impl From<zip::result::ZipError> for ZipNoError {
+impl From<zip::result::ZipError> for ZipCSError {
     fn from(e: zip::result::ZipError) -> Self {
-        ZipNoError::ZIP(e)
+        ZipCSError::ZIP(e)
     }
 }
