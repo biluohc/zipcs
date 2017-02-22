@@ -1,6 +1,6 @@
 [package]
 name = "zipcs"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["biluohc <biluohc@qq.com>"]
 description = "Unzip with charset setting."
 repository = "https://github.com/biluohc/zipcs"
@@ -22,10 +22,11 @@ panic = 'abort'
 # panic = 'unwind'
 
 [dependencies]
-app = { git = "https://github.com/biluohc/app-rs", branch="master", version ="^0.1.0" }
 zip = "^0.2.1"
 encoding = "^0.2"
 
 stderr ="^0.7.0"
 poolite ="^0.5.3"
+app = { git = "https://github.com/biluohc/app-rs", branch="master", version ="0.1.1" }
+# app = { path = "../app" }
 

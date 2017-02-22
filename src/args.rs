@@ -106,7 +106,7 @@ impl<'app> ToConfig for App<'app> {
         }
         assert!(outdir.ends_with('/'));
 
-        let zips: Vec<String> = self.get_args().unwrap().values().cloned().collect();
+        let zips: Vec<String> = self.get_args().unwrap().clone();
         zips_path_valid(&zips)?;
 
         Ok(Config::new(charset, outdir, zips, task))
