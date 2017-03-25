@@ -18,15 +18,15 @@ panic = 'unwind'
 opt-level = 3      #    cargo build --release -vv
 debug = false
 # debug = true 
-panic = 'abort' 
-# panic = 'unwind'
+# panic = 'abort' 
+panic = 'unwind'
 
 [dependencies]
 zip = "^0.2.1"
 encoding = "^0.2"
 
 stderr ="^0.7.0"
-poolite ="^0.5.3"
+poolite ="^0.5.5"
 app = { git = "https://github.com/biluohc/app-rs", branch="master", version ="0.1.1" }
 # app = { path = "../app" }
 
