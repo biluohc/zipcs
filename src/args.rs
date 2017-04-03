@@ -121,6 +121,9 @@ impl<'app, 's: 'app> OptValueParse<'app> for &'s mut CharSet {
     fn is_bool(&self) -> bool {
         false
     }
+    fn is_must(&self) -> bool {
+        false
+    }
     fn parse(&mut self, opt_name: String, msg: &str) -> Result<(), String> {
         match CharSet::new(msg) {
             Err(_) => return Err(format!("OPTION({}) parse<CharSet> fails: \"{}\"", opt_name, msg)),
