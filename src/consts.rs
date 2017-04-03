@@ -1,6 +1,6 @@
 // crate's info
 pub const NAME: &'static str = "Zipcs";
-pub const VERSION: &'static str = "0.2.2";
+pub const VERSION: &'static str = "0.2.3";
 
 pub const AUTHOR: &'static str = "Wspsxing";
 pub const EMAIL: &'static str = "biluohc@qq.com";

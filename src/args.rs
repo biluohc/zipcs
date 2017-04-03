@@ -20,7 +20,7 @@ impl Config {
         init!();
         let mut config = Self::default();
         let mut list = false;
-        let mut log =Some(String::new());
+        let mut log = Some(String::new());
         config.outdir.push_str("./");
         {
             let charsets = format!("Sets the charset Zipcs using({})",
@@ -46,7 +46,8 @@ impl Config {
                          .short("o")
                          .long("outdir")
                          .help("Sets Output directory"))
-                .args("ZipArchives", &mut config.zips);
+                .args("ZipArchives", &mut config.zips)
+                .args_check(zips_path_valid);
             app.parse();
         }
         if list == true {
@@ -67,8 +68,6 @@ impl Config {
             self.outdir.push('/');
         }
         assert!(self.outdir.ends_with('/'));
-
-        zips_path_valid(&self.zips)?;
         Ok(self)
     }
     pub fn charset(&self) -> &CharSet {
@@ -96,18 +95,15 @@ impl Default for Task {
     }
 }
 
-fn zips_path_valid(zips: &[String]) -> Result<(), String> {
-    if zips.is_empty() {
-        return Err("no input ZipArchives.".to_owned());
-    }
+fn zips_path_valid(zips: &[String], name: &str) -> Result<(), String> {
     for zip in zips {
         let path = Path::new(zip);
         if !path.exists() {
-            return Err(format!("{:?} is not exists", path));
+            return Err(format!("Arguments({}): \"{:?}\" is not exists", name, path));
         } else if path.is_dir() {
-            return Err(format!("{:?} is a directory.", path));
+            return Err(format!("Arguments({}): \"{:?}\" is a directory", name, path));
         } else if File::open(path).is_err() {
-            return Err(format!("{:?} is invalid.", path));
+            return Err(format!("Arguments({}): \"{:?}\" is invalid", name, path));
         }
     }
     Ok(())
@@ -131,7 +127,7 @@ impl<'app, 's: 'app> OptValueParse<'app> for &'s mut CharSet {
         }
         Ok(())
     }
-    fn check(&self, _ : &str) -> Result<(),String> {
+    fn check(&self, _: &str) -> Result<(), String> {
         Ok(())
     }
 }

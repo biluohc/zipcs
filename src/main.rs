@@ -31,7 +31,7 @@ use args::{Config, Task};
 fn main() {
     init!();
     if let Err(e) = fun() {
-        errln!("{}_Error: {}", NAME, &e);
+        errln!("{}ERROR: {}",NAME, &e);
         assert_ne!("", e.trim());
         exit(1);
     };
