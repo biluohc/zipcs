@@ -1,6 +1,6 @@
 // crate's info
 pub const NAME: &'static str = "Zipcs";
-pub const VERSION: &'static str = "0.2.1";
+pub const VERSION: &'static str = "0.2.2";
 
 pub const AUTHOR: &'static str = "Wspsxing";
 pub const EMAIL: &'static str = "biluohc@qq.com";
@@ -15,7 +15,9 @@ pub const CHARSETS: &'static str = "UTF_8, UTF_16BE, UTF_16LE, GBK, GB18030, HZ,
 // https://docs.rs/encoding/0.2.33/encoding/all/index.html
 use encoding::all::{UTF_8, UTF_16BE, UTF_16LE, GBK, GB18030, HZ, BIG5_2003};
 use encoding::{Encoding, DecoderTrap};
+use std::default::Default;
 use std::borrow::Cow;
+
 #[derive(Debug)]
 #[allow(non_camel_case_types)]
 pub enum CharSet {
@@ -31,9 +33,9 @@ pub enum CharSet {
 impl CharSet {
     pub fn new(name: &str) -> Result<Self, ()> {
         let cs = match name {
-            "utf-8" => CharSet::UTF_8,
-            "utf-16be" => CharSet::UTF_16BE,
-            "utf-16le" => CharSet::UTF_16LE,
+            "utf8" => CharSet::UTF_8,
+            "utf16be" => CharSet::UTF_16BE,
+            "utf16le" => CharSet::UTF_16LE,
             "gbk" => CharSet::GBK,
             "gb18030" => CharSet::GB18030,
             "hz" => CharSet::HZ,
@@ -52,5 +54,11 @@ impl CharSet {
             CharSet::HZ => HZ.decode(u8slice, DecoderTrap::Strict),
             CharSet::BIG5_2003 => BIG5_2003.decode(u8slice, DecoderTrap::Strict),
         }
+    }
+}
+
+impl Default for CharSet {
+    fn default() -> CharSet {
+        CharSet::UTF_8
     }
 }

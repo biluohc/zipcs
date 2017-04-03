@@ -111,7 +111,7 @@ fn for_zip_arch_file(pool: &Pool, zip_arch_path: &str, config: Rc<Config>) -> Re
         let zip_arch_mutex = zip_arch_mutex.clone();
         let name = name.to_string();
         let i = *i;
-        pool.spawn(Box::new(move || unzipfile_matchres(zip_arch_mutex, i, name)));
+        pool.push(move || unzipfile_matchres(zip_arch_mutex, i, name));
     }
 
     loop {
