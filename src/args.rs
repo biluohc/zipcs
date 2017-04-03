@@ -20,7 +20,7 @@ impl Config {
         init!();
         let mut config = Self::default();
         let mut list = false;
-        let mut log = String::new();
+        let mut log =Some(String::new());
         config.outdir.push_str("./");
         {
             let charsets = format!("Sets the charset Zipcs using({})",
@@ -126,6 +126,9 @@ impl<'app, 's: 'app> OptValueParse<'app> for &'s mut CharSet {
             Err(_) => return Err(format!("OPTION({}) parse<CharSet> fails: \"{}\"", opt_name, msg)),
             Ok(o) => **self = o,
         }
+        Ok(())
+    }
+    fn check(&self, _ : &str) -> Result<(),String> {
         Ok(())
     }
 }
