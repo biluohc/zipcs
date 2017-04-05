@@ -16,16 +16,16 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn get() -> Result<Self, String> {
+    pub fn get() -> Self {
         init!();
         let mut config = Self::default();
         let mut list = false;
         let mut log = Some(String::new());
         config.outdir.push_str("./");
-        {
-            let charsets = format!("Sets the charset Zipcs using({})",
-                                   CHARSETS.replace("_", "").to_lowercase());
-            let mut app = App::new(NAME)
+        let charsets = format!("Sets the charset Zipcs using({})",
+                               CHARSETS.replace("_", "").to_lowercase());
+        let helper = {
+            App::new(NAME)
                 .version(VERSION)
                 .author(AUTHOR, EMAIL)
                 .addr(URL_NAME, URL)
@@ -47,13 +47,20 @@ impl Config {
                          .long("outdir")
                          .help("Sets Output directory"))
                 .args("ZipArchives", &mut config.zips)
-                .args_check(zips_path_valid);
-            app.parse();
-        }
+                .args_help("Sets the ZipArchives to unzip")
+                .args_check(zips_path_valid)
+                .parse_args()
+        };
         if list == true {
             config.task = Task::LIST;
         }
-        config.check()
+        match config.check() { 
+            Err(e) => {
+                helper.help_err_exit(e, 1);
+                unreachable!();
+            }
+            Ok(o) => return o,
+        }
     }
     fn check(mut self) -> Result<Self, String> {
         if Path::new(&self.outdir).is_file() {
@@ -112,13 +119,13 @@ fn zips_path_valid(zips: &[String], name: &str) -> Result<(), String> {
 /// Custom OptValue by impl OptValueParse
 impl<'app, 's: 'app> OptValueParse<'app> for &'s mut CharSet {
     fn into_opt_value(self) -> OptValue<'app> {
-        OptValue { inner: Box::from(self) }
+        OptValue::new(Box::from(self))
     }
-    fn is_bool(&self) -> bool {
+    fn is_bool(&self)->bool {
         false
     }
-    fn is_must(&self) -> bool {
-        false
+    fn default(&self) ->Option<String> {
+        Some("utf8".to_owned())
     }
     fn parse(&mut self, opt_name: String, msg: &str) -> Result<(), String> {
         match CharSet::new(msg) {

@@ -27,6 +27,6 @@ encoding = "^0.2"
 
 stderr ="^0.7.0"
 poolite ="^0.6.1"
-app = { git = "https://github.com/biluohc/app-rs", branch="master", version ="^0.4.2" }
+app = { git = "https://github.com/biluohc/app-rs", branch="master", version ="^0.5.3" }
 # app = { path = "../app" }
 

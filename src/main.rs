@@ -37,7 +37,7 @@ fn main() {
     };
 }
 fn fun() -> Result<(), String> {
-    let config = Rc::from(Config::get()?);
+    let config = Rc::from(Config::get());
     dbln!("Config::get(): {:?}", config);
     let pool = match *config.task() {
         Task::LIST => Pool::new(),
