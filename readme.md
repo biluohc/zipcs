@@ -15,11 +15,11 @@ cargo build --release
 
 target/release/zipcs --help
 ```
-默认使用 **utf8** 编码(可选字符集 `-h/--help` 可以看到)，依次解压每个zip文件到当前目录。  
-使用 `-cs/--charset` 指定字符集,`-o/--outdir` 指定输出目录，`-l/--list` 只列出Zip内容(不解压)。
 
-一个栗子:  
-`zipcs -o dir/ -cs utf-8 xxx.zip yyy.zip` 
+![zipcs_help.jpg](https://github.com/biluohc/zipcs/blob/master/zipcs_help.jpg?raw=true)
+
+默认使用 **utf8** 编码(可选字符集 `-h/--help` 可以看到)，依次解压每个zip文件到当前目录。  
+使用 `-cs/--charset` 指定字符集,`-o/--outdir` 指定输出目录，`-l/--list` 仅列出Zip内容(不解压)。
 
 ![zipcs.jpg](https://github.com/biluohc/zipcs/blob/master/zipcs.jpg?raw=true)
 
