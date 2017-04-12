@@ -1,10 +1,10 @@
 // crate's info
 pub const NAME: &'static str = "Zipcs";
-pub const VERSION: &'static str = "0.2.3";
+pub const VERSION: &'static str = "0.3.0";
 
 pub const AUTHOR: &'static str = "Wspsxing";
 pub const EMAIL: &'static str = "biluohc@qq.com";
-pub const ABOUT: &'static str = "Unzip with charset setting.";
+pub const ABOUT: &'static str = "Useful tools collection";
 pub const URL_NAME: &'static str = "Repository";
 pub const URL: &'static str = "https://github.com/biluohc/zipcs";
 
@@ -14,11 +14,11 @@ pub const CHARSETS: &'static str = "UTF_8, UTF_16BE, UTF_16LE, GBK, GB18030, HZ,
 // charset.downcase() to handle
 // https://docs.rs/encoding/0.2.33/encoding/all/index.html
 use encoding::all::{UTF_8, UTF_16BE, UTF_16LE, GBK, GB18030, HZ, BIG5_2003};
-use encoding::{Encoding, DecoderTrap};
+use encoding::{Encoding, DecoderTrap, EncoderTrap};
 use std::default::Default;
 use std::borrow::Cow;
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 #[allow(non_camel_case_types)]
 pub enum CharSet {
     UTF_8,
@@ -44,7 +44,7 @@ impl CharSet {
         };
         Ok(cs)
     }
-    pub fn u8slice_to_string(&self, u8slice: &[u8]) -> Result<String, Cow<'static, str>> {
+    pub fn decode(&self, u8slice: &[u8]) -> Result<String, Cow<'static, str>> {
         match *self {
             CharSet::UTF_8 => UTF_8.decode(u8slice, DecoderTrap::Strict),
             CharSet::UTF_16BE => UTF_16BE.decode(u8slice, DecoderTrap::Strict),
@@ -53,6 +53,17 @@ impl CharSet {
             CharSet::GB18030 => GB18030.decode(u8slice, DecoderTrap::Strict),
             CharSet::HZ => HZ.decode(u8slice, DecoderTrap::Strict),
             CharSet::BIG5_2003 => BIG5_2003.decode(u8slice, DecoderTrap::Strict),
+        }
+    }
+    pub fn encode(&self, str: &str) -> Result<Vec<u8>, Cow<'static, str>> {
+        match *self {
+            CharSet::UTF_8 => UTF_8.encode(str, EncoderTrap::Strict),
+            CharSet::UTF_16BE => UTF_16BE.encode(str, EncoderTrap::Strict),
+            CharSet::UTF_16LE => UTF_16LE.encode(str, EncoderTrap::Strict),
+            CharSet::GBK => GBK.encode(str, EncoderTrap::Strict),
+            CharSet::GB18030 => GB18030.encode(str, EncoderTrap::Strict),
+            CharSet::HZ => HZ.encode(str, EncoderTrap::Strict),
+            CharSet::BIG5_2003 => BIG5_2003.encode(str, EncoderTrap::Strict),
         }
     }
 }

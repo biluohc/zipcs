@@ -1,8 +1,8 @@
 [package]
 name = "zipcs"
-version = "0.2.3"
+version = "0.3.0"
 authors = ["biluohc <biluohc@qq.com>"]
-description = "Unzip with charset setting."
+description = "Useful tools collection"
 repository = "https://github.com/biluohc/zipcs"
 # documentation = "https://docs.rs/zipcs/"
 readme = "readme.md"
@@ -24,6 +24,9 @@ panic = 'unwind'
 [dependencies]
 zip = "^0.2.1"
 encoding = "^0.2"
+duct = "^0.8.2"
+urlparse = "^0.7.3"
+requests = "^0.0.30"
 
 stderr ="^0.7.0"
 poolite ="^0.6.1"

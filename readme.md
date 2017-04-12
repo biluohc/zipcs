@@ -1,4 +1,4 @@
-# Unzip with charset setting written with Rust.
+# Useful tools collection.
 
 ## Usage
 
@@ -13,15 +13,37 @@ git clone https://github.com/biluohc/zipcs --depth 1
 cd zipcs 
 cargo build --release
 
-target/release/zipcs --help
+./target/release/zipcs --help
 ```
+## Help
+```sh
+ D/cache zipcs -h
+INFO:
+  Zipcs - 0.3.0
+  Useful tools collection
 
-![zipcs_help.jpg](https://github.com/biluohc/zipcs/blob/master/zipcs_help.jpg?raw=true)
+USAGE:
+  Zipcs [global options] command [command options] [arguments...]
 
-默认使用 **utf8** 编码(可选字符集 `-h/--help` 可以看到)，依次解压每个zip文件到当前目录。  
-使用 `-cs/--charset` 指定字符集,`-o/--outdir` 指定输出目录，`-l/--list` 仅列出Zip内容(不解压)。
+GLOBAL OPTIONS:
+   -h, --help       show the help message
+   -v, --version    show the version message
 
-![zipcs.jpg](https://github.com/biluohc/zipcs/blob/master/zipcs.jpg?raw=true)
+COMMANDS:
+    file    File encoding/decoding with charset setting
+    ip      Get ip address
+    path    Path decoding with charset setting
+    ping    ping domains/ips
+    url     Urls decoding/encoding
+    zip     Unzip with charset setting
+
+ARGS:
+   <Files>          Files need to encode/decode
+   <Paths>          Paths need to decode
+   <Hosts/IPs>      Hosts or IPs need to ping
+   <Urls>           Urls need to decode/encode
+   <ZipArchives>    ZipArchives need to unzip
+```
 
 ## Ps
 * 未做预防覆盖原有文件和目录的处理，后果概不负责。

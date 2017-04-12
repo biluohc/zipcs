@@ -1,27 +1,23 @@
 use super::consts::*;
-use app::{App, Opt, OptValue, OptValueParse};
-use super::Loger;
+use coll::*;
 
-use std::default::Default;
-use std::fs::read_dir;
-use std::path::Path;
-use std::fs::File;
+use app::{App, Cmd, Opt, OptValue, OptValueParse};
+use stderr::Loger;
 
 #[derive(Debug,Default)]
 pub struct Config {
-    charset: CharSet, //zip -cs/--charset   //utf-8
-    outdir: String, //zipcs -o/--outdir   //./
-    zips: Vec<String>, //zipcs ZipArchive0 ZipArchive1 ...
-    task: Task, // UNZIP
+    zip: Zips,
+    ping: Pings,
+    url: Urls,
+    path: Paths,
+    file: Files,
 }
 
 impl Config {
-    pub fn get() -> Self {
-        init!();
+    pub fn parse() {
         let mut config = Self::default();
         let mut list = false;
         let mut log = Some(String::new());
-        config.outdir.push_str("./");
         let charsets = format!("Sets the charset Zipcs using({})",
                                CHARSETS.replace("_", "").to_lowercase());
         let helper = {
@@ -30,101 +26,139 @@ impl Config {
                 .author(AUTHOR, EMAIL)
                 .addr(URL_NAME, URL)
                 .desc(ABOUT)
-                .opt(Opt::new("list", &mut list)
-                         .short("l")
-                         .long("list")
-                         .help("Only list files from ZipArchives"))
-                .opt(Opt::new("module_path", &mut log)
-                         .long("log")
-                         .short("log")
-                         .help("Print log for debug"))
-                .opt(Opt::new("charset", &mut config.charset)
-                         .short("cs")
-                         .long("charset")
-                         .help(&charsets))
-                .opt(Opt::new("outdir", &mut config.outdir)
-                         .short("o")
-                         .long("outdir")
-                         .help("Sets Output directory"))
-                .args("ZipArchives", &mut config.zips)
-                .args_help("Sets the ZipArchives to unzip")
-                .args_check(zips_path_valid)
+                .cmd(Cmd::new("zip")
+                         .desc("Unzip with charset setting")
+                         .opt(Opt::new("list", &mut list)
+                                  .short("l")
+                                  .long("list")
+                                  .help("Only list files from ZipArchives"))
+                         .opt(Opt::new("module_path", &mut log)
+                                  .long("log")
+                                  .short("log")
+                                  .help("Print log for debug"))
+                         .opt(Opt::new("charset", &mut config.zip.charset)
+                                  .short("cs")
+                                  .long("charset")
+                                  .help(&charsets))
+                         .opt(Opt::new("outdir", &mut config.zip.outdir)
+                                  .short("o")
+                                  .long("outdir")
+                                  .help("Sets Output directory"))
+                         .args("ZipArchives", &mut config.zip.zips)
+                         .args_help("ZipArchives need to unzip"))
+                .cmd(Cmd::new("ping")
+                         .desc("ping domains/ips")
+                         .opt(Opt::new("count", &mut config.ping.count)
+                                  .short("c")
+                                  .long("count")
+                                  .help("stop after sending count ECHO_REQUEST packets"))
+                         .opt(Opt::new("_6", &mut config.ping._6)
+                                  .short("6")
+                                  .help("use IPV6"))
+                         .opt(Opt::new("only-line", &mut config.ping.only_line)
+                                  .short("l")
+                                  .long("only-line")
+                                  .help("print result only-line"))
+                         .args("Hosts/IPs", &mut config.ping.hosts)
+                         .args_help("Hosts or IPs need to ping"))
+                .cmd(Cmd::new("url")
+                         .desc("Urls decoding/encoding")
+                         .opt(Opt::new("encode", &mut config.url.is_encode)
+                                  .short("e")
+                                  .long("encode")
+                                  .help("encode(default is decode)"))
+                         .opt(Opt::new("plus", &mut config.url.is_plus)
+                                  .short("p")
+                                  .long("plus")
+                                  .help("replaces ' ' with '+'"))
+                         .args("Urls", &mut config.url.strs)
+                         .args_help("Urls need to decode/encode"))
+                .cmd(Cmd::new("path")
+                         .desc("Path decoding with charset setting")
+                         .opt(Opt::new("charset", &mut config.path.charset)
+                                  .short("cs")
+                                  .long("charset")
+                                  .help(&charsets))
+                         .opt(Opt::new("depth", &mut config.path.depth)
+                                  .short("d")
+                                  .long("depth")
+                                  .help("decode paths recursively depth"))
+                         .opt(Opt::new("store", &mut config.path.store)
+                                  .short("s")
+                                  .long("store")
+                                  .help("store result by rename"))
+                         .opt(Opt::new("link", &mut config.path.link)
+                                  .short("l")
+                                  .long("link")
+                                  .help("follow symbolic links"))
+                         .args("Paths", &mut config.path.strs)
+                         .args_help("Paths need to decode"))
+                .cmd(Cmd::new("file")
+                         .desc("File encoding/decoding with charset setting")
+                         .opt(Opt::new("charset", &mut config.file.charset)
+                                  .short("cs")
+                                  .long("charset")
+                                  .help(&charsets))
+                         .opt(Opt::new("charset_out", &mut config.file.charset_out)
+                                  .short("co")
+                                  .long("charset-out")
+                                  .help("charset output(encode) using"))
+                         .opt(Opt::new("store", &mut config.file.store)
+                                  .short("s")
+                                  .long("store")
+                                  .help("store result by rewrite"))
+                         .args("Files", &mut config.file.strs)
+                         .args_help("Files need to encode/decode"))
+                .cmd(Cmd::new("ip").desc("Get ip address"))
                 .parse_args()
         };
-        if list == true {
-            config.task = Task::LIST;
+        if list {
+            config.zip.task = Task::LIST;
         }
-        match config.check() { 
-            Err(e) => {
-                helper.help_err_exit(e, 1);
-                unreachable!();
+        if let Err(e) = config.check_fix_call(helper.current_cmd_str()) {
+            helper.help_cmd_err_exit(helper.current_cmd_ref(), e, 1);
+        }
+    }
+    fn check_fix_call(mut self, cmd: Option<&str>) -> Result<(), String> {
+        dbstln!("Config: {:?}: {:?}", cmd, self);
+        match cmd {
+            Some("zip") => {
+                self.zip.check_fix()?;
+                self.zip.call()?;
             }
-            Ok(o) => return o,
-        }
-    }
-    fn check(mut self) -> Result<Self, String> {
-        if Path::new(&self.outdir).is_file() {
-            return Err(format!("outdir {:?} is a file.", self.outdir));
-        } else if Path::new(&self.outdir).exists() {
-            if let Err(e) = read_dir(&self.outdir) {
-                return Err(format!("outdir {:?} is invalid {:?}.", self.outdir, e));
+            Some("ping") => {
+                self.ping.check_fix()?;
+                self.ping.call();
             }
+            Some("url") => {
+                self.url.call();
+            }
+            Some("path") => {
+                self.path.check_fix()?;
+                self.path.call();
+            }
+            Some("file") => {
+                self.file.check_fix()?;
+                self.file.call();
+            }
+            Some("ip") => {
+                call();
+            }
+            _ => unreachable!(),
         }
-        //dir + name =dirname-> dir/ + name
-        if !self.outdir.ends_with('/') {
-            self.outdir.push('/');
-        }
-        assert!(self.outdir.ends_with('/'));
-        Ok(self)
-    }
-    pub fn charset(&self) -> &CharSet {
-        &self.charset
-    }
-    pub fn outdir(&self) -> &String {
-        &self.outdir
-    }
-    pub fn zips(&self) -> &[String] {
-        self.zips.as_slice()
-    }
-    pub fn task(&self) -> &Task {
-        &self.task
+        Ok(())
     }
 }
 
-#[derive(Debug,PartialEq)]
-pub enum Task {
-    LIST, // zipcs -l/--list
-    UNZIP, // Extract files from archive with full paths
-}
-impl Default for Task {
-    fn default() -> Task {
-        Task::UNZIP
-    }
-}
-
-fn zips_path_valid(zips: &[String], name: &str) -> Result<(), String> {
-    for zip in zips {
-        let path = Path::new(zip);
-        if !path.exists() {
-            return Err(format!("Arguments({}): \"{:?}\" is not exists", name, path));
-        } else if path.is_dir() {
-            return Err(format!("Arguments({}): \"{:?}\" is a directory", name, path));
-        } else if File::open(path).is_err() {
-            return Err(format!("Arguments({}): \"{:?}\" is invalid", name, path));
-        }
-    }
-    Ok(())
-}
-
-/// Custom OptValue by impl OptValueParse
+/// Custom `OptValue` by impl `OptValueParse`
 impl<'app, 's: 'app> OptValueParse<'app> for &'s mut CharSet {
     fn into_opt_value(self) -> OptValue<'app> {
         OptValue::new(Box::from(self))
     }
-    fn is_bool(&self)->bool {
+    fn is_bool(&self) -> bool {
         false
     }
-    fn default(&self) ->Option<String> {
+    fn default(&self) -> Option<String> {
         Some("utf8".to_owned())
     }
     fn parse(&mut self, opt_name: String, msg: &str) -> Result<(), String> {
