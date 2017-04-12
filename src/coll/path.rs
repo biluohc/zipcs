@@ -2,13 +2,13 @@ use stderr::Loger;
 
 use super::consts::*;
 
-
+#[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
-use std::ffi::OsString;
-
 use std::path::{Path, PathBuf};
+use std::ffi::OsString;
 use std::process::exit;
 use std::error::Error;
+use std::borrow::Cow;
 use std::sync::Arc;
 use std::fs::rename;
 use std::u32;
@@ -58,9 +58,11 @@ impl Default for Paths {
 }
 
 fn path_recurse(path: OsString, mut depth: i64, config: Arc<Paths>) -> Result<(), String> {
-    if config.charset != CharSet::UTF_8 && config.charset.decode(path.as_bytes()).is_ok() {
-        let str = config.charset.decode(path.as_bytes()).unwrap();
-        if config.store && str.as_bytes() != path.as_os_str().as_bytes() {
+    let path_decode_result = decode(&path, &config.charset);
+    if config.charset != CharSet::UTF_8 && path_decode_result.is_ok() {
+        let str = path_decode_result.unwrap();
+        let noeq = noeq(&str, &path);
+        if config.store && noeq {
             rename(&path, &str)
                 .map_err(|e| format!("{:?} rename fails: {}", path, e.description()))?;
             println!("{:?} -> {:?}", path, str);
@@ -97,4 +99,23 @@ fn path_recurse(path: OsString, mut depth: i64, config: Arc<Paths>) -> Result<()
         path_recurse(entry.path().into_os_string(), depth, config.clone())?;
     }
     Ok(())
+}
+
+#[cfg(unix)]
+fn decode(path: &OsString, cs: &CharSet) -> Result<String, Cow<'static, str>> {
+    cs.decode(path.as_bytes())
+}
+#[cfg(windows)]
+fn decode(path: &OsString, cs: &CharSet) -> Result<String, Cow<'static, str>> {
+    cs.decode(path.to_string_lossy().as_bytes())
+}
+
+#[cfg(unix)]
+fn noeq(str: &str, path: &OsString) -> bool {
+    str.as_bytes() != path.as_bytes()
+}
+
+#[cfg(windows)]
+fn noeq(str: &str, path: &OsString) -> bool {
+    str.as_bytes() != path.to_string_lossy().as_bytes()
 }
