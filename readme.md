@@ -3,7 +3,7 @@
 ## Usage
 
 ```sh
- cargo install --git https://github.com/biluohc/zipcs
+ cargo +nightly install --git https://github.com/biluohc/zipcs 
  zipcs --help
  ```
 
@@ -11,7 +11,7 @@
 ```sh
 git clone https://github.com/biluohc/zipcs  
 cd zipcs 
-cargo build --release
+cargo +nightly build --release
 
 ./target/release/zipcs --help
 ```
@@ -44,6 +44,10 @@ ARGS:
    <Urls>           Urls need to decode/encode
    <ZipArchives>    ZipArchives need to unzip
 ```
+
+## Binary
+
+* [The Release Page](https://github.com/biluohc/zipcs/releases)  
 
 ## Ps
 * 未做预防覆盖原有文件和目录的处理，后果概不负责。
