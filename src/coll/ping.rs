@@ -1,7 +1,11 @@
-use duct::cmd;
 use poolite::{IntoPool, Pool};
 use stderr::Loger;
 
+#[cfg(windows)]
+use super::consts::*;
+
+use std::process::Command as Cmd;
+use std::process::Output;
 use std::net::ToSocketAddrs;
 use std::error::Error;
 use std::sync::Arc;
@@ -90,33 +94,80 @@ fn ping(config: Arc<Pings>, idx: usize, host_len_max: usize) {
     // host
     args.push(host);
 
-    match cmd("ping", &args[..]).read() {
-        Ok(o) => {
-            if config.only_line {
-                printf(&o, host, host_len_max);
-            } else {
-                println!("{}\n", o);
-            }
-        }
-        Err(e) => {
-            dbstln!("{:?}", e);
-            errln!("{}", e.description());
-        }
+    let output = Cmd::new("ping")
+        .args(&args[..])
+        .output()
+        .map_err(|e| panic!("exec ping fails: {}", e.description()))
+        .unwrap();
+    if output.status.success() {
+        printf(&output, config.only_line, host, host_len_max);
+    } else {
+        printf_err(&output, host, host_len_max);
     }
 }
 
-fn printf(msg: &str, host: &str, host_len_max: usize) {
-    let vs: Vec<String> = msg.lines().map(|s| s.to_string()).collect();
+fn printf(msg: &Output, only_line: bool, host: &str, host_len_max: usize) {
+    assert!(!msg.stdout.is_empty());
+    let msg = decode(&msg.stdout[..]);
+    let msg = msg.trim();
+    // -l/--only-line
+    if !only_line {
+        println!("{}\n", msg);
+        return;
+    }
+
+    let vs: Vec<String> = msg.lines().map(|s| s.trim().to_string()).collect();
     dbstln!("{:?}", msg);
-    let space_fix = |host: &str| {
-        let mut str = host.to_owned();
-        while str.len() < host_len_max {
-            str += " ";
-        }
-        str
-    };
+
+    #[cfg(unix)]
     println!("{}:  {} -> {}",
-             space_fix(host),
+             space_fix(host, host_len_max),
              vs[vs.len() - 1],
              vs[vs.len() - 2]);
+
+    #[cfg(windows)]
+    println!("{}:  {} -> {}",
+             space_fix(host, host_len_max),
+             vs[vs.len() - 1],
+             vs[vs.len() - 3]);
+}
+
+fn printf_err(msg: &Output, host: &str, host_len_max: usize) {
+    assert!(!msg.stdout.is_empty());
+    let msg = decode(&msg.stdout[..]);
+    let vs: Vec<String> = msg.trim()
+        .lines()
+        .map(|s| s.trim().to_string())
+        .collect();
+    errln!("{}:  {}", space_fix(host, host_len_max), vs[vs.len() - 1]);
+}
+
+fn space_fix(msg: &str, host_len_max: usize) -> String {
+    let mut str = msg.to_owned();
+    while str.len() < host_len_max {
+        str += " ";
+    }
+    str
+}
+
+#[cfg(unix)]
+fn decode(msg: &[u8]) -> String {
+    String::from_utf8_lossy(msg).into_owned().to_owned()
+}
+
+#[cfg(windows)]
+fn decode(msg: &[u8]) -> String {
+    let result = CharSet::GB18030.decode(msg);
+    if result.is_ok() {
+        return result.unwrap();
+    }
+    let result = CharSet::BIG5_2003.decode(msg);
+    if result.is_ok() {
+        return result.unwrap();
+    }
+    let result = CharSet::HZ.decode(msg);
+    if result.is_ok() {
+        return result.unwrap();
+    }
+    String::from_utf8_lossy(msg).into_owned().to_owned()
 }

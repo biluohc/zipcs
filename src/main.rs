@@ -1,13 +1,13 @@
-extern crate duct;
+extern crate encoding;
+extern crate urlparse;
+extern crate requests;
+extern crate zip;
+
 extern crate app;
+extern crate poolite;
 #[macro_use]
 extern crate stderr;
 use stderr::Loger;
-extern crate poolite;
-extern crate encoding;
-extern crate zip;
-extern crate urlparse;
-extern crate requests;
 
 mod coll;
 mod consts;

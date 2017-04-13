@@ -24,12 +24,12 @@ panic = 'unwind'
 [dependencies]
 zip = "^0.2.1"
 encoding = "^0.2"
-duct = "^0.8.2"
 urlparse = "^0.7.3"
 requests = "^0.0.30"
 
-stderr ="^0.7.0"
-poolite ="^0.6.1"
-app = { git = "https://github.com/biluohc/app-rs", branch="master", version ="^0.5.3" }
+stderr = "^0.7.0"
+poolite = "^0.6.1"
+app = "^0.5.3"
+# app = { git = "https://github.com/biluohc/app-rs", branch="master", version ="^0.5.3" }
 # app = { path = "../app" }
 

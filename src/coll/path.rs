@@ -61,8 +61,8 @@ fn path_recurse(path: OsString, mut depth: i64, config: Arc<Paths>) -> Result<()
     let path_decode_result = decode(&path, &config.charset);
     if config.charset != CharSet::UTF_8 && path_decode_result.is_ok() {
         let str = path_decode_result.unwrap();
-        let noeq = noeq(&str, &path);
-        if config.store && noeq {
+        let ne = ne(&str, &path);
+        if config.store && ne {
             rename(&path, &str)
                 .map_err(|e| format!("{:?} rename fails: {}", path, e.description()))?;
             println!("{:?} -> {:?}", path, str);
@@ -111,11 +111,11 @@ fn decode(path: &OsString, cs: &CharSet) -> Result<String, Cow<'static, str>> {
 }
 
 #[cfg(unix)]
-fn noeq(str: &str, path: &OsString) -> bool {
+fn ne(str: &str, path: &OsString) -> bool {
     str.as_bytes() != path.as_bytes()
 }
 
 #[cfg(windows)]
-fn noeq(str: &str, path: &OsString) -> bool {
+fn ne(str: &str, path: &OsString) -> bool {
     str.as_bytes() != path.to_string_lossy().as_bytes()
 }

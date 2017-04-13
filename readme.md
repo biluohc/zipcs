@@ -9,7 +9,7 @@
 
 ## Or
 ```sh
-git clone https://github.com/biluohc/zipcs --depth 1 
+git clone https://github.com/biluohc/zipcs  
 cd zipcs 
 cargo build --release
 
