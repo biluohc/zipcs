@@ -152,7 +152,7 @@ impl Config {
 
 /// Custom `OptValue` by impl `OptValueParse`
 impl<'app, 's: 'app> OptValueParse<'app> for &'s mut CharSet {
-    fn into_opt_value(self) -> OptValue<'app> {
+    fn into(self) -> OptValue<'app> {
         OptValue::new(Box::from(self))
     }
     fn is_bool(&self) -> bool {

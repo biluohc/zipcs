@@ -120,13 +120,13 @@ fn printf(msg: &Output, only_line: bool, host: &str, host_len_max: usize) {
     dbstln!("{:?}", msg);
 
     #[cfg(unix)]
-    println!("{}:  {} -> {}",
+    println!("{}: {} -> {}",
              space_fix(host, host_len_max),
              vs[vs.len() - 1],
              vs[vs.len() - 2]);
 
     #[cfg(windows)]
-    println!("{}:  {} -> {}",
+    println!("{}: {} -> {}",
              space_fix(host, host_len_max),
              vs[vs.len() - 1],
              vs[vs.len() - 3]);
@@ -139,7 +139,7 @@ fn printf_err(msg: &Output, host: &str, host_len_max: usize) {
         .lines()
         .map(|s| s.trim().to_string())
         .collect();
-    errln!("{}:  {}", space_fix(host, host_len_max), vs[vs.len() - 1]);
+    errln!("{}: {}", space_fix(host, host_len_max), vs[vs.len() - 1]);
 }
 
 fn space_fix(msg: &str, host_len_max: usize) -> String {
