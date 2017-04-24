@@ -19,6 +19,7 @@ pub struct Pings {
 }
 impl Pings {
     pub fn call(self) {
+        dbstln!("{:?}",self);
         // sleep_sort
         let pool = Pool::new().min(self.hosts.len()).run().into_pool();
         let config = Arc::from(self);

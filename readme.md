@@ -19,7 +19,7 @@ cargo +nightly build --release
 ```sh
  D/cache zipcs -h
 INFO:
-  Zipcs - 0.3.0
+  Zipcs - 0.x.x
   Useful tools collection
 
 USAGE:

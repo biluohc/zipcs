@@ -15,6 +15,6 @@ mod args;
 use args::Config;
 
 fn main() {
-    init!();
+    Loger::init(module_path!());
     Config::parse();
 }
