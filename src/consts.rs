@@ -1,10 +1,10 @@
 // crate's info
-pub const NAME: &'static str = "Zipcs";
-pub const VERSION: &'static str = "0.3.0";
-
+pub const NAME: &'static str = env!("CARGO_PKG_NAME");
+pub const VERSION: &'static str =env!("CARGO_PKG_VERSION");
 pub const AUTHOR: &'static str = "Wspsxing";
 pub const EMAIL: &'static str = "biluohc@qq.com";
-pub const ABOUT: &'static str = "Useful tools collection";
+pub const DESC: &'static str =env!("CARGO_PKG_DESCRIPTION");
+
 pub const URL_NAME: &'static str = "Repository";
 pub const URL: &'static str = "https://github.com/biluohc/zipcs";
 

@@ -25,7 +25,7 @@ impl Config {
                 .version(VERSION)
                 .author(AUTHOR, EMAIL)
                 .addr(URL_NAME, URL)
-                .desc(ABOUT)
+                .desc(DESC)
                 .cmd(Cmd::new("zip")
                          .desc("Unzip with charset setting")
                          .opt(Opt::new("list", &mut list)
