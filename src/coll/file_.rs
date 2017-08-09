@@ -1,5 +1,3 @@
-use stderr::Loger;
-
 use super::consts::*;
 use std::io::{Read, Write};
 use std::process::exit;

@@ -1,6 +1,5 @@
 use super::consts::*;
 
-use stderr::Loger;
 use poolite::{Pool, IntoPool};
 use zip::result::ZipError;
 use zip::read::ZipArchive;

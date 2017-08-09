@@ -1,5 +1,3 @@
-use stderr::Loger;
-
 use super::consts::*;
 
 #[cfg(unix)]

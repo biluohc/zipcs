@@ -1,5 +1,4 @@
 use poolite::{IntoPool, Pool};
-use stderr::Loger;
 
 #[cfg(windows)]
 use super::consts::*;
