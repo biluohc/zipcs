@@ -1,6 +1,6 @@
 [package]
 name = "zipcs"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Wspsxing <biluohc@qq.com>"]
 description = "Useful tools collection"
 repository = "https://github.com/biluohc/zipcs"
@@ -28,11 +28,11 @@ urlparse = "^0.7.3"
 requests = "^0.0.30"
 
 stderr = "0.8.0"
-poolite = "0.6.2"
-# app = "0.5.6"
+poolite = "0.6.3"
+app = "0.6.0"
 
 # stderr = { git="https://github.com/biluohc/stderr", version= "0.7.1" }
 # stderr = { path = "../stderr" }
-app = { git = "https://github.com/biluohc/app-rs", branch="master", version ="0.6.0" }
+# app = { git = "https://github.com/biluohc/app", branch="master", version ="0.6.0" }
 # app = { path = "../app" }
 

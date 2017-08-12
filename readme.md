@@ -21,7 +21,7 @@ cargo +nightly build --release
 ### Help
 
 ```sh
-zipcs 0.3.0
+zipcs 0.3.1
 Useful tools collection
 
 AUTHOR:
@@ -40,8 +40,8 @@ OPTIONS:
 
 CAMMANDS:
    zip, z      Unzip with charset setting
-   path, P     Path decoding with charset setting
-   file, f     File encoding/decoding with charset setting
+   path, P     Paths decoding with charset setting
+   file, f     Files encoding/decoding with charset setting
    ping, p     ping domains/ips
    ip, i       Get ip address
    url, u      Urls decoding/encoding

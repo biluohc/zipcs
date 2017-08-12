@@ -22,10 +22,10 @@ impl Urls {
             };
             match rest {
                 Ok(o) => {
-                    println!("{}\n  {}", str, o);
+                    println!("{}", o);
                 }
                 Err(o) => {
-                    println!("{}\n  {:?}", str, o);
+                    errln!("{:?}",  o);
                 }
             }
 
