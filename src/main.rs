@@ -20,17 +20,13 @@ cargo +nightly build --release
 ## Help
 
 ```sh
-zipcs 0.3.1
+zipcs 0.3.2
 Useful tools collection
-
-AUTHOR:
-   Wspsxing <biluohc@qq.com>
-
-ADDRESS:
-   Repository: https://github.com/biluohc/zipcs
+Wspsxing <biluohc@qq.com>
+Repository: https://github.com/biluohc/zipcs
 
 USAGE:
-   zipcs [options] 
+   zipcs options 
    zipcs <command> [args]
 
 OPTIONS:
@@ -59,6 +55,8 @@ CAMMANDS:
 extern crate encoding;
 extern crate urlparse;
 extern crate requests;
+extern crate chardet;
+extern crate rayon;
 extern crate zip;
 
 extern crate app;

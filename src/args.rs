@@ -1,7 +1,7 @@
 use super::consts::*;
 use coll::*;
 
-use app::{App, Cmd, Opt, Args, OptValue, OptValueParse};
+use app::{App, Cmd, Opt, Args, OptValue, OptValueParse, OptTypo};
 
 #[derive(Debug,Default)]
 pub struct Config {
@@ -164,14 +164,31 @@ impl<'app, 's: 'app> OptValueParse<'app> for &'s mut CharSet {
     fn default(&self) -> Option<String> {
         Some("utf8".to_owned())
     }
-    fn parse(&mut self, opt_name: String, msg: &str) -> Result<(), String> {
-        match CharSet::new(msg) {
-            Err(_) => return Err(format!("OPTION(<{}>) parse<CharSet> fails: \"{}\"", opt_name, msg)),
-            Ok(o) => **self = o,
+    fn parse(&mut self, opt_name: &str, msg: &str, count: &mut usize, typo: &mut OptTypo) -> Result<(), String> {
+        if *count == 0 || typo.is_covered() || typo.is_multiple() {
+            match CharSet::new(msg) {
+                Err(_) => {
+                    Err(format!(
+                        "OPTION(<{}>) parse<CharSet> fails: \"{}\"",
+                        opt_name,
+                        msg
+                    ))?;
+                }
+                Ok(o) => **self = o,}
+        } else if typo.is_single() {
+            Err(format!(
+                "OPTION(<{}>) can only occurs once, but second: {:?}",
+                opt_name,
+                msg
+            ))?;
         }
         Ok(())
     }
-    fn check(&self, _: &str) -> Result<(), String> {
+    /// env::arg could is `""`
+    fn check(&self, opt_name: &str, optional: &bool, count: &usize, _: &OptTypo) -> Result<(), String> {
+        if !optional && *count == 0 &&self.default().is_none() {
+            Err(format!("OPTION(<{}>) missing", opt_name))?;
+        }
         Ok(())
     }
 }

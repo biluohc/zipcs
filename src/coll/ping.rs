@@ -1,13 +1,12 @@
-use poolite::{IntoPool, Pool};
-
-#[cfg(windows)]
-use super::consts::*;
+use rayon::prelude::*;
+use encoding::DecoderTrap;
+use chardet::{detect,charset2encoding};
+use encoding::label::encoding_from_whatwg_label;
 
 use std::process::Command as Cmd;
 use std::process::Output;
 use std::net::ToSocketAddrs;
 use std::error::Error;
-use std::sync::Arc;
 
 #[derive(Debug)]
 pub struct Pings {
@@ -19,23 +18,18 @@ pub struct Pings {
 impl Pings {
     pub fn call(self) {
         dbstln!("{:?}",self);
-        // sleep_sort
-        let pool = Pool::new().min(self.hosts.len()).run().into_pool();
-        let config = Arc::from(self);
         let host_len_max = {
             let mut len = 0;
-            for str in &config.hosts {
+            for str in &self.hosts {
                 if str.len() > len {
                     len = str.len();
                 }
             }
             len
         };
-        for idx in 0..config.hosts.len() {
-            let config = config.clone();
-            pool.push(move || ping(config, idx, host_len_max));
-        }
-        pool.join();
+        // sleep sort
+        self.hosts.par_iter()
+         .for_each(|host| ping(host, &self,host_len_max))
     }
     pub fn check_fix(&mut self) -> Result<(), String> {
         let mut vs = Vec::new();
@@ -59,7 +53,7 @@ impl Pings {
             }
             vs.extend(arg_tmp);
         }
-        assert!(!vs.is_empty());
+        debug_assert!(!vs.is_empty());
         self.hosts = vs;
         Ok(())
     }
@@ -76,9 +70,8 @@ impl Default for Pings {
     }
 }
 
-fn ping(config: Arc<Pings>, idx: usize, host_len_max: usize) {
+fn ping(host:&str, config: &Pings,  host_len_max: usize) {
     let count_str = format!("{}", config.count);
-    let host = &config.hosts[idx];
     let mut args = Vec::new();
     // -6
     if config._6 {
@@ -107,7 +100,7 @@ fn ping(config: Arc<Pings>, idx: usize, host_len_max: usize) {
 }
 
 fn printf(msg: &Output, only_line: bool, host: &str, host_len_max: usize) {
-    assert!(!msg.stdout.is_empty());
+    debug_assert!(!msg.stdout.is_empty());
     let msg = decode(&msg.stdout[..]);
     let msg = msg.trim();
     // -l/--only-line
@@ -133,7 +126,7 @@ fn printf(msg: &Output, only_line: bool, host: &str, host_len_max: usize) {
 }
 
 fn printf_err(msg: &Output, host: &str, host_len_max: usize) {
-    assert!(!msg.stdout.is_empty());
+    debug_assert!(!msg.stdout.is_empty());
     let msg = decode(&msg.stdout[..]);
     let vs: Vec<String> = msg.trim()
         .lines()
@@ -150,24 +143,18 @@ fn space_fix(msg: &str, host_len_max: usize) -> String {
     str
 }
 
-#[cfg(unix)]
-fn decode(msg: &[u8]) -> String {
-    String::from_utf8_lossy(msg).into_owned().to_owned()
-}
+// #[cfg(unix)]
+// fn decode(msg: &[u8]) -> String {
+//     String::from_utf8_lossy(msg).into_owned().to_owned()
+// }
 
-#[cfg(windows)]
+// #[cfg(windows)]
 fn decode(msg: &[u8]) -> String {
-    let result = CharSet::GB18030.decode(msg);
-    if result.is_ok() {
-        return result.unwrap();
-    }
-    let result = CharSet::BIG5_2003.decode(msg);
-    if result.is_ok() {
-        return result.unwrap();
-    }
-    let result = CharSet::HZ.decode(msg);
-    if result.is_ok() {
-        return result.unwrap();
+    let result = detect(msg);
+    if let Some(code) =  encoding_from_whatwg_label(charset2encoding(&result.0)) {
+       if let Ok(str)= code.decode(msg, DecoderTrap::Strict){
+           return str;
+       }
     }
     String::from_utf8_lossy(msg).into_owned().to_owned()
 }

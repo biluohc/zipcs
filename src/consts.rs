@@ -5,7 +5,7 @@ pub const AUTHOR: &'static str = "Wspsxing";
 pub const EMAIL: &'static str = "biluohc@qq.com";
 pub const DESC: &'static str =env!("CARGO_PKG_DESCRIPTION");
 
-pub const URL_NAME: &'static str = "Repository";
+pub const URL_NAME: &'static str = "Repo";
 pub const URL: &'static str = "https://github.com/biluohc/zipcs";
 
 // copy form use@line16 ,but BIG5_2003 is swap by big5.

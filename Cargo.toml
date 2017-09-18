@@ -1,35 +1,31 @@
 [package]
 name = "zipcs"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["Wspsxing <biluohc@qq.com>"]
-description = "Useful tools collection"
+description = "Useful tools collection."
 repository = "https://github.com/biluohc/zipcs"
 # documentation = "https://docs.rs/zipcs/"
 readme = "readme.md"
 keywords = ["unzip","charset","zip"]
 license = "MIT"
 
-[profile.dev]      #    cargo build 
-opt-level = 0     
-debug = true      
-panic = 'unwind'
-
 [profile.release]  #    cargo build --release
 opt-level = 3      #    cargo build --release -vv
+panic = 'unwind'
 debug = false
 # debug = true 
-# panic = 'abort' 
-panic = 'unwind'
 
 [dependencies]
 zip = "^0.2.1"
 encoding = "^0.2"
 urlparse = "^0.7.3"
 requests = "^0.0.30"
+chardet = "^0.2"
+rayon = "^0.8.2"
 
 stderr = "0.8.0"
 poolite = "0.6.3"
-app = "0.6.0"
+app = "0.6.1"
 
 # stderr = { git="https://github.com/biluohc/stderr", version= "0.7.1" }
 # stderr = { path = "../stderr" }
