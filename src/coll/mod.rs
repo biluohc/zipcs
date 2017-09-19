@@ -17,3 +17,6 @@ pub use self::file_::*;
 
 mod ip;
 pub use self::ip::*;
+
+mod chardetect;
+pub use self::chardetect::*;

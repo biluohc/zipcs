@@ -1,7 +1,7 @@
 use super::consts::*;
 use coll::*;
 
-use app::{App, Cmd, Opt, Args, OptValue, OptValueParse, OptTypo};
+use app::{App, Cmd, Opt, Args, args, OptValue, OptValueParse, OptTypo};
 
 #[derive(Debug,Default)]
 pub struct Config {
@@ -10,6 +10,7 @@ pub struct Config {
     url: Urls,
     path: Paths,
     file: Files,
+    chardet: CharDet,
 }
 
 impl Config {
@@ -96,13 +97,19 @@ impl Config {
                                   .long("only-line")
                                   .help("print result only-line"))
                          .args(Args::new("Host/IP", &mut config.ping.hosts).help("Host or IP need to ping")))
+                .cmd(Cmd::new("chardet").short("c").sort_key("5").desc("Detect the charset for File(for reference)")
+                .args(args(
+                    "File",
+                    &mut config.chardet.files,
+                    "The file need to detect charset",
+                )))
                 .cmd(Cmd::new("ip")
                          .short("i")
-                         .sort_key("5")
+                         .sort_key("6")
                          .desc("Get ip address"))
                 .cmd(Cmd::new("url")
                          .short("u")
-                         .sort_key("6")
+                         .sort_key("7")
                          .desc("Urls decoding/encoding")
                          .opt(Opt::new("encode", &mut config.url.is_encode)
                                   .short('e')
@@ -132,6 +139,10 @@ impl Config {
             Some("ping") => {
                 self.ping.check_fix()?;
                 self.ping.call();
+            }
+            Some("chardet")=> {
+                self.chardet.check()?;
+                 self.chardet.call();
             }
             Some("url") => {
                 self.url.call();

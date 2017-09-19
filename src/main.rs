@@ -20,10 +20,10 @@ cargo +nightly build --release
 ## Help
 
 ```sh
-zipcs 0.3.2
-Useful tools collection
+zipcs 0.3.3
+Useful tools collection.
 Wspsxing <biluohc@qq.com>
-Repository: https://github.com/biluohc/zipcs
+Repo: https://github.com/biluohc/zipcs
 
 USAGE:
    zipcs options 
@@ -34,12 +34,13 @@ OPTIONS:
    -V, --version       Show the version message
 
 CAMMANDS:
-   zip, z      Unzip with charset setting
-   path, P     Paths decoding with charset setting
-   file, f     Files encoding/decoding with charset setting
-   ping, p     ping domains/ips
-   ip, i       Get ip address
-   url, u      Urls decoding/encoding
+   zip, z         Unzip with charset setting
+   path, P        Paths decoding with charset setting
+   file, f        Files encoding/decoding with charset setting
+   ping, p        ping domains/ips
+   chardet, c     Detect the charset for File(for reference)
+   ip, i          Get ip address
+   url, u         Urls decoding/encoding
 ```
 
 ## Binary

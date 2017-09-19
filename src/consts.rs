@@ -11,6 +11,13 @@ pub const URL: &'static str = "https://github.com/biluohc/zipcs";
 // copy form use@line16 ,but BIG5_2003 is swap by big5.
 pub const CHARSETS: &'static str = "UTF_8, UTF_16BE, UTF_16LE, GBK, GB18030, HZ, BIG5";
 
+pub fn space_fix(msg: &str, msg_len_max: usize) -> String {
+    let mut str = msg.to_owned();
+    while str.len() < msg_len_max {
+        str += " ";
+    }
+    str
+}
 // charset.downcase() to handle
 // https://docs.rs/encoding/0.2.33/encoding/all/index.html
 use encoding::all::{UTF_8, UTF_16BE, UTF_16LE, GBK, GB18030, HZ, BIG5_2003};

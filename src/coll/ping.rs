@@ -3,6 +3,7 @@ use encoding::DecoderTrap;
 use chardet::{detect,charset2encoding};
 use encoding::label::encoding_from_whatwg_label;
 
+use super::consts::space_fix;
 use std::process::Command as Cmd;
 use std::process::Output;
 use std::net::ToSocketAddrs;
@@ -18,15 +19,7 @@ pub struct Pings {
 impl Pings {
     pub fn call(self) {
         dbstln!("{:?}",self);
-        let host_len_max = {
-            let mut len = 0;
-            for str in &self.hosts {
-                if str.len() > len {
-                    len = str.len();
-                }
-            }
-            len
-        };
+        let host_len_max = self.hosts.as_slice().iter().max_by_key(|p|p.len()).unwrap().len();
         // sleep sort
         self.hosts.par_iter()
          .for_each(|host| ping(host, &self,host_len_max))
@@ -133,14 +126,6 @@ fn printf_err(msg: &Output, host: &str, host_len_max: usize) {
         .map(|s| s.trim().to_string())
         .collect();
     errln!("{}: {}", space_fix(host, host_len_max), vs[vs.len() - 1]);
-}
-
-fn space_fix(msg: &str, host_len_max: usize) -> String {
-    let mut str = msg.to_owned();
-    while str.len() < host_len_max {
-        str += " ";
-    }
-    str
 }
 
 // #[cfg(unix)]
