@@ -12,8 +12,8 @@ pub use self::url::*;
 mod path;
 pub use self::path::*;
 
-mod file_;
-pub use self::file_::*;
+mod file;
+pub use self::file::*;
 
 mod ip;
 pub use self::ip::*;

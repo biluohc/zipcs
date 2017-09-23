@@ -40,6 +40,7 @@ CAMMANDS:
    file, f        Files encoding/decoding with charset setting
    ping, p        ping domains/ips
    chardet, c     Detect the charset for File(for reference)
+   charset, C     Show all CharSet supported
    ip, i          Get ip address
    url, u         Urls decoding/encoding
 ```

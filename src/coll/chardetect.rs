@@ -3,7 +3,7 @@ use chardet::detect;
 
 use super::consts::space_fix;
 use std::path::Path;
-use std::io::{self, Read};
+use std::io::{self, Read , BufReader};
 use std::fs::File;
 
 #[derive(Debug, Default)]
@@ -18,7 +18,7 @@ impl CharDet {
         // println!("{}{:3}CharSet{:13}Rate{:8}Info", space_fix("File",max_len), "", "", "");
         self.files.par_iter()
          .for_each(|file| 
-         match chardet(&file) {
+         match chardet(file) {
              Ok(o)=> {
                  let (mut charset, rate, info) = o ; 
                  // "WINDOWS_1258".len() = 12 -> 12+6 = 18
@@ -48,7 +48,7 @@ impl CharDet {
 }
 
 fn chardet(f :&str)->io::Result<(String, f32, String)> {
-    let mut file = File::open(f)?;
+    let mut file = BufReader::new(File::open(f)?);
     let mut bytes = Vec::default();
     file.read_to_end(&mut bytes)?;
     Ok(detect(bytes.as_slice()))

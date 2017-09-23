@@ -17,7 +17,7 @@ impl Config {
     pub fn parse() {
         let mut config = Self::default();
         let mut list = false;
-        let charsets = format!("Sets the charset Zipcs using({})",
+        let charsets = format!("Sets the charset Zipcs using({})\nYou can see all CharSet by `zipcs charset`",
                                CHARSETS.replace("_", "").to_lowercase());
         let helper = {
             App::new(NAME)
@@ -103,6 +103,8 @@ impl Config {
                     &mut config.chardet.files,
                     "The file need to detect charset",
                 )))
+                .cmd(Cmd::new("charset").short("C").sort_key("50").desc("Show all CharSet supported")
+                 )
                 .cmd(Cmd::new("ip")
                          .short("i")
                          .sort_key("6")
@@ -143,6 +145,9 @@ impl Config {
             Some("chardet")=> {
                 self.chardet.check()?;
                  self.chardet.call();
+            }
+            Some("charset") => {
+                CharSet::show();
             }
             Some("url") => {
                 self.url.call();
