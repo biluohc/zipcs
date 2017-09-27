@@ -4,7 +4,7 @@
 ## Usage
 
 ```sh
- cargo +nightly install --git https://github.com/biluohc/zipcs 
+ cargo install --git https://github.com/biluohc/zipcs 
  zipcs -h
 ```
 
@@ -13,7 +13,7 @@
 ```sh
 git clone https://github.com/biluohc/zipcs  
 cd zipcs 
-cargo +nightly build --release
+cargo build --release
 
 ./target/release/zipcs --help
 ```

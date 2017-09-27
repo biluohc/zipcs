@@ -3,12 +3,11 @@ language: rust
 cache: cargo
 rust:
   - nightly
-#   - beta
-#   - stable
-# matrix:
-#   allow_failures:
-#     - rust: stable
-#     - rust: beta
+  - beta
+  - stable
+matrix:
+  allow_failures:
+    - rust: nightly
 script: |
   cargo build &&
   cargo test #&&
