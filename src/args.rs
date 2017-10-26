@@ -25,7 +25,6 @@ impl Config {
                 .author(AUTHOR, EMAIL)
                 .addr(URL_NAME, URL)
                 .desc(DESC)
-                .allow_zero_args(false)
                 .cmd(Cmd::new("zip")
                          .short("z")
                          .sort_key("1")
@@ -126,6 +125,9 @@ impl Config {
         };
         if list {
             config.zip.task = Task::LIST;
+        }
+        if *helper.args_len() == 0 {
+            helper.help_exit(0);
         }
         if let Err(e) = config.check_fix_call(helper.current_cmd_str()) {
             helper.help_cmd_err_exit(helper.current_cmd_ref(), e, 1);
