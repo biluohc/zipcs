@@ -125,6 +125,9 @@ fn printf_err(msg: &Output, host: &str, host_len_max: usize) {
         .lines()
         .map(|s| s.trim().to_string())
         .collect();
+        if vs.is_empty() {
+            return;
+        }
     errln!("{}: {}", space_fix(host, host_len_max), vs[vs.len() - 1]);
 }
 

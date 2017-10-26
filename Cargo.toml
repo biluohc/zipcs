@@ -9,10 +9,9 @@ readme = "readme.md"
 keywords = ["unzip","charset","zip"]
 license = "MIT"
 
-[profile.release]  #    cargo build --release
-opt-level = 3      #    cargo build --release -vv
+[profile.release] 
+opt-level = 3
 panic = 'unwind'
-debug = false
 # debug = true 
 
 [dependencies]
