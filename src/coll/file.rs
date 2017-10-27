@@ -3,7 +3,6 @@ use std::io::{Read, Write};
 use std::process::exit;
 use std::path::Path;
 use std::fs::File;
-use std::rc::Rc;
 
 #[derive(Debug, Default)]
 pub struct Files {
@@ -24,10 +23,9 @@ impl Files {
     }
     pub fn call(self) {
         dbstln!("Config_file_: {:?}", self);
-        let config = Rc::from(self);
 
-        for str in &config.strs {
-            if let Err(e) = file_handle(str, config.clone()) {
+        for str in &self.strs {
+            if let Err(e) = file_handle(str, &self) {
                 errln!("{}", e);
                 exit(1);
             }
@@ -35,7 +33,7 @@ impl Files {
     }
 }
 
-fn file_handle(file_name: &str, config: Rc<Files>) -> Result<(), String> {
+fn file_handle(file_name: &str, config: &Files) -> Result<(), String> {
     let mut file = File::open(file_name).map_err(|e| {
         format!("{:?} open fails: {}", file_name, e)
     })?;

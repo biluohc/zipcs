@@ -3,13 +3,15 @@ use super::consts::*;
 use zip::result::ZipError;
 use zip::read::ZipArchive;
 
-use std::fs::{File, create_dir_all};
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
+
+use std::fs::{File, create_dir_all, Permissions, set_permissions};
 use std::io::{copy, BufReader};
 use std::ffi::OsString;
 use std::error::Error;
 use std::fs::read_dir;
 use std::path::Path;
-use std::rc::Rc;
 use std;
 
 #[derive(Debug, PartialEq)]
@@ -57,11 +59,9 @@ impl Zips {
     }
     pub fn call(self) -> Result<(), String> {
         dbln!("Config_zip: {:?}", self);
-        let config = Rc::from(self);
 
-        for zip_arch_path in config.zips() {
-            let config = config.clone();
-            if let Err(e) = for_zip_arch_file(zip_arch_path, config) {
+        for zip_arch_path in self.zips() {
+            if let Err(e) = for_zip_arch_file(zip_arch_path, &self) {
                 return Err(format!("{:?} -> {:?}", zip_arch_path, e));
             }
         }
@@ -81,7 +81,7 @@ impl Zips {
     }
 }
 
-fn for_zip_arch_file(zip_arch_path: &str, config: Rc<Zips>) -> Result<(), ZipCSError> {
+fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSError> {
     let zip_arch_path_ = Path::new(zip_arch_path);
     let zip_arch = File::open(zip_arch_path)?;
     let reader = BufReader::new(zip_arch);
@@ -153,6 +153,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: Rc<Zips>) -> Result<(), ZipCSE
                 continue;
             }
         };
+        // Get name
         let name = {
             if let Ok(o) = config.charset().decode(file.name_raw()) {
                 o
@@ -165,6 +166,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: Rc<Zips>) -> Result<(), ZipCSE
         let mut path = outdir_path.to_path_buf();
         path.push(&name);
 
+        // create dir/file
         if name.ends_with('/') {
             println!("${}-> {:?}", i, path.as_path());
             create_dir_all(&path)?;
@@ -177,6 +179,22 @@ fn for_zip_arch_file(zip_arch_path: &str, config: Rc<Zips>) -> Result<(), ZipCSE
             }
             let mut outfile = File::create(&path)?;
             copy(&mut file, &mut outfile)?;
+        }
+
+        // Get/Set permissions
+        #[allow(unused_must_use)]
+        #[cfg(unix)]
+        {
+            if let Some(mode) = file.unix_mode() {
+                set_permissions(&path, Permissions::from_mode(mode)).map_err(|e| {
+                    eprintln!(
+                        "fs::set_permissions({}, {:?}) occurs error: {}",
+                        path.as_path().display(),
+                        mode,
+                        e.description()
+                    )
+                });
+            }
         }
     }
     Ok(())

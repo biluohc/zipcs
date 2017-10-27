@@ -13,7 +13,7 @@ impl RegexList {
         I: IntoIterator<Item = S>,
     {
         let mut rl = Self::default();
-        for re in res.into_iter() {
+        for re in res {
             rl.0.push(Regex::new(re.as_ref())?);
         }
         Ok(rl)

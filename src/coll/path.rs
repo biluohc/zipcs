@@ -7,7 +7,6 @@ use std::ffi::OsString;
 use std::process::exit;
 use std::error::Error;
 use std::borrow::Cow;
-use std::sync::Arc;
 use std::fs::rename;
 
 #[derive(Debug)]
@@ -29,16 +28,9 @@ impl Paths {
     }
     pub fn call(self) {
         dbstln!("Config_path: {:?}", self);
-        let depth = self.depth.clone();
-        let config = Arc::from(self);
-        for str in &config.strs {
-            let depth = depth.clone();
-            if let Err(e) = path_recurse(
-                Path::new(str).to_owned().into_os_string(),
-                depth,
-                config.clone(),
-            )
-            {
+        let depth = self.depth;
+        for str in &self.strs {
+            if let Err(e) = path_recurse(Path::new(str).to_owned().into_os_string(), depth, &self) {
                 errln!("{}", e);
                 exit(1);
             }
@@ -58,7 +50,7 @@ impl Default for Paths {
     }
 }
 
-fn path_recurse(path: OsString, mut depth: Option<usize>, config: Arc<Paths>) -> Result<(), String> {
+fn path_recurse(path: OsString, mut depth: Option<usize>, config: &Paths) -> Result<(), String> {
     let path_decode_result = decode(&path, &config.charset);
     if config.charset != CharSet::UTF_8 && path_decode_result.is_ok() {
         let str = path_decode_result.unwrap();
@@ -100,7 +92,7 @@ fn path_recurse(path: OsString, mut depth: Option<usize>, config: Arc<Paths>) ->
             format!("{:?}'s entry read fails: {}", path, e.description())
         })?;
         dbstln!("{:?}", entry.path());
-        path_recurse(entry.path().into_os_string(), depth, config.clone())?;
+        path_recurse(entry.path().into_os_string(), depth, config)?;
     }
     Ok(())
 }

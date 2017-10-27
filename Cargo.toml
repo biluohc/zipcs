@@ -1,6 +1,6 @@
 [package]
 name = "zipcs"
-version = "0.3.3"
+version = "0.3.4"
 authors = ["Wspsxing <biluohc@qq.com>"]
 description = "Useful tools collection."
 repository = "https://github.com/biluohc/zipcs"

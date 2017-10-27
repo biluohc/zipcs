@@ -20,7 +20,7 @@ cargo build --release
 ## Help
 
 ```sh
-zipcs 0.3.3
+zipcs 0.3.4
 Useful tools collection.
 Wspsxing <biluohc@qq.com>
 Repo: https://github.com/biluohc/zipcs
@@ -49,8 +49,6 @@ CAMMANDS:
 * [The Release Page](https://github.com/biluohc/zipcs/releases)  
 
 ## Ps
-* 未做预防覆盖原有文件和目录的处理，后果概不负责。
-* 未处理文件目录权限（即Zip原有的权限没了）。
 * 所依赖的[zip-rs](https://github.com/mvdnes/zip-rs)库目前不支持加密,所以目前不支持密码。
 */
 

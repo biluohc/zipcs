@@ -1,3 +1,4 @@
+#![allow(unknown_lints,const_static_lifetime)]
 // crate's info
 pub const NAME: &'static str = env!("CARGO_PKG_NAME");
 pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
