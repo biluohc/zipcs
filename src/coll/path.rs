@@ -9,11 +9,10 @@ use std::error::Error;
 use std::borrow::Cow;
 use std::sync::Arc;
 use std::fs::rename;
-use std::u32;
 
 #[derive(Debug)]
 pub struct Paths {
-    pub depth: u32,
+    pub depth: Option<usize>,
     pub store: bool,
     pub link: bool,
     pub strs: Vec<String>,
@@ -30,11 +29,12 @@ impl Paths {
     }
     pub fn call(self) {
         dbstln!("Config_path: {:?}", self);
+        let depth = self.depth.clone();
         let config = Arc::from(self);
-        let depth = config.depth as i64;
         for str in &config.strs {
+            let depth = depth.clone();            
             if let Err(e) = path_recurse(Path::new(str).to_owned().into_os_string(),
-                                         depth,
+                                        depth,
                                          config.clone()) {
                 errln!("{}", e);
                 exit(1);
@@ -46,7 +46,7 @@ impl Paths {
 impl Default for Paths {
     fn default() -> Self {
         Paths {
-            depth: u32::MAX,
+            depth: None,
             store: false,
             link: false,
             strs: Vec::new(),
@@ -55,7 +55,7 @@ impl Default for Paths {
     }
 }
 
-fn path_recurse(path: OsString, mut depth: i64, config: Arc<Paths>) -> Result<(), String> {
+fn path_recurse(path: OsString,mut depth: Option<usize>, config: Arc<Paths>) -> Result<(), String> {
     let path_decode_result = decode(&path, &config.charset);
     if config.charset != CharSet::UTF_8 && path_decode_result.is_ok() {
         let str = path_decode_result.unwrap();
@@ -73,7 +73,7 @@ fn path_recurse(path: OsString, mut depth: i64, config: Arc<Paths>) -> Result<()
 
     // -d/--depth
     let path = PathBuf::from(path);
-    if !path.as_path().is_dir() || depth < 1 {
+    if !path.as_path().is_dir() || depth.as_ref() == Some(&0) {
         return Ok(());
     }
 
@@ -86,7 +86,7 @@ fn path_recurse(path: OsString, mut depth: i64, config: Arc<Paths>) -> Result<()
             return Ok(());
         }
     }
-    depth -= 1;
+    depth = depth.map(|d| d - 1);
 
     for entry in path.as_path()
             .read_dir()
@@ -108,6 +108,7 @@ fn decode(path: &OsString, cs: &CharSet) -> Result<String, Cow<'static, str>> {
     cs.decode(path.to_string_lossy().as_bytes())
 }
 
+// no-equal
 #[cfg(unix)]
 fn ne(str: &str, path: &OsString) -> bool {
     str.as_bytes() != path.as_bytes()
