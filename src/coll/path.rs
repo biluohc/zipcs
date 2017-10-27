@@ -32,10 +32,13 @@ impl Paths {
         let depth = self.depth.clone();
         let config = Arc::from(self);
         for str in &config.strs {
-            let depth = depth.clone();            
-            if let Err(e) = path_recurse(Path::new(str).to_owned().into_os_string(),
-                                        depth,
-                                         config.clone()) {
+            let depth = depth.clone();
+            if let Err(e) = path_recurse(
+                Path::new(str).to_owned().into_os_string(),
+                depth,
+                config.clone(),
+            )
+            {
                 errln!("{}", e);
                 exit(1);
             }
@@ -55,14 +58,15 @@ impl Default for Paths {
     }
 }
 
-fn path_recurse(path: OsString,mut depth: Option<usize>, config: Arc<Paths>) -> Result<(), String> {
+fn path_recurse(path: OsString, mut depth: Option<usize>, config: Arc<Paths>) -> Result<(), String> {
     let path_decode_result = decode(&path, &config.charset);
     if config.charset != CharSet::UTF_8 && path_decode_result.is_ok() {
         let str = path_decode_result.unwrap();
         let ne = ne(&str, &path);
         if config.store && ne {
-            rename(&path, &str)
-                .map_err(|e| format!("{:?} rename fails: {}", path, e.description()))?;
+            rename(&path, &str).map_err(|e| {
+                format!("{:?} rename fails: {}", path, e.description())
+            })?;
             println!("{:?} -> {:?}", path, str);
         } else {
             println!("{:?} : {:?}", path, str);
@@ -79,20 +83,22 @@ fn path_recurse(path: OsString,mut depth: Option<usize>, config: Arc<Paths>) -> 
 
     // -l/--link
     if !config.link {
-        let metadata = path.as_path()
-            .symlink_metadata()
-            .map_err(|e| format!("{:?} read without symlink fails: {}", path, e))?;
+        let metadata = path.as_path().symlink_metadata().map_err(|e| {
+            format!("{:?} read without symlink fails: {}", path, e)
+        })?;
         if !metadata.is_dir() {
             return Ok(());
         }
     }
     depth = depth.map(|d| d - 1);
 
-    for entry in path.as_path()
-            .read_dir()
-            .map_err(|e| format!("{:?} read fails: {}", path, e.description()))? {
-        let entry = entry
-            .map_err(|ref e| format!("{:?}'s entry read fails: {}", path, e.description()))?;
+    for entry in path.as_path().read_dir().map_err(|e| {
+        format!("{:?} read fails: {}", path, e.description())
+    })?
+    {
+        let entry = entry.map_err(|ref e| {
+            format!("{:?}'s entry read fails: {}", path, e.description())
+        })?;
         dbstln!("{:?}", entry.path());
         path_recurse(entry.path().into_os_string(), depth, config.clone())?;
     }

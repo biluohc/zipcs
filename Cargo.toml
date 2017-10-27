@@ -25,7 +25,6 @@ rayon = "^0.8.2"
 zip = "^0.2.1"
 
 stderr = "0.8.0"
-poolite = "0.6.4"
 app = "0.6.3"
 
 # stderr = { git="https://github.com/biluohc/stderr", version= "0.7.1" }

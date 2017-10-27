@@ -64,10 +64,9 @@ extern crate regex;
 extern crate rayon;
 extern crate zip;
 
-extern crate app;
-extern crate poolite;
 #[macro_use]
 extern crate stderr;
+extern crate app;
 
 mod coll;
 pub mod consts;

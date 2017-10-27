@@ -1,7 +1,7 @@
 include!("ping.rs");
 
 
-use regex::{self,Regex};
+use regex::{self, Regex};
 
 #[derive(Debug, Default)]
 pub struct RegexList(pub Vec<Regex>);

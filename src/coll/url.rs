@@ -1,7 +1,7 @@
 use urlparse::{quote, quote_plus, unquote, unquote_plus};
 
 
-#[derive(Debug,Default)]
+#[derive(Debug, Default)]
 pub struct Urls {
     pub is_plus: bool,
     pub is_encode: bool,
@@ -25,7 +25,7 @@ impl Urls {
                     println!("{}", o);
                 }
                 Err(o) => {
-                    errln!("{:?}",  o);
+                    errln!("{:?}", o);
                 }
             }
 
