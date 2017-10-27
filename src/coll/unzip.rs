@@ -3,10 +3,7 @@ use super::consts::*;
 use zip::result::ZipError;
 use zip::read::ZipArchive;
 
-#[cfg(unix)]
-use std::os::unix::fs::PermissionsExt;
-
-use std::fs::{File, create_dir_all, Permissions, set_permissions};
+use std::fs::{File, create_dir_all};
 use std::io::{copy, BufReader};
 use std::ffi::OsString;
 use std::error::Error;
@@ -185,6 +182,9 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
         #[allow(unused_must_use)]
         #[cfg(unix)]
         {
+            use std::os::unix::fs::PermissionsExt;
+            use std::fs::{Permissions, set_permissions};
+
             if let Some(mode) = file.unix_mode() {
                 set_permissions(&path, Permissions::from_mode(mode)).map_err(|e| {
                     eprintln!(
