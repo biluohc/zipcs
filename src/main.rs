@@ -54,10 +54,13 @@ CAMMANDS:
 * 所依赖的[zip-rs](https://github.com/mvdnes/zip-rs)库目前不支持加密,所以目前不支持密码。
 */
 
+#[macro_use]
+extern crate lazy_static;
 extern crate encoding;
 extern crate urlparse;
 extern crate requests;
 extern crate chardet;
+extern crate regex;
 extern crate rayon;
 extern crate zip;
 
