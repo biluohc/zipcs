@@ -21,7 +21,7 @@ cargo build --release
 ### Help
 
 ```sh
-zipcs 0.3.4
+zipcs 0.3.5
 Useful tools collection.
 Wspsxing <biluohc@qq.com>
 Repo: https://github.com/biluohc/zipcs

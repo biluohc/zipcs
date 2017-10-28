@@ -20,7 +20,7 @@ cargo build --release
 ## Help
 
 ```sh
-zipcs 0.3.4
+zipcs 0.3.5
 Useful tools collection.
 Wspsxing <biluohc@qq.com>
 Repo: https://github.com/biluohc/zipcs
@@ -58,6 +58,7 @@ extern crate encoding;
 extern crate urlparse;
 extern crate requests;
 extern crate chardet;
+extern crate filetime;
 extern crate regex;
 extern crate rayon;
 extern crate zip;

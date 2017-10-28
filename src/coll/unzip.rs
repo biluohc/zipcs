@@ -2,6 +2,8 @@ use super::consts::*;
 
 use zip::result::ZipError;
 use zip::read::ZipArchive;
+use filetime::{FileTime, set_symlink_file_times};
+// https://docs.rs/filetime/ not follow symlink?
 
 use std::fs::{File, create_dir_all};
 use std::io::{copy, BufReader};
@@ -176,6 +178,20 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
             }
             let mut outfile = File::create(&path)?;
             copy(&mut file, &mut outfile)?;
+        }
+        // Get/Set m/atime
+        #[allow(unused_must_use)]
+        {
+            let tm = file.last_modified().to_timespec();
+            let tm = FileTime::from_seconds_since_1970(tm.sec as u64, tm.nsec as u32);
+            set_symlink_file_times(&path, tm, tm).map_err(|e| {
+                eprintln!(
+                    "filetime::set_symlink_file_times({}, {:?}) occurs error: {}",
+                    path.as_path().display(),
+                    tm,
+                    e.description()
+                )
+            });
         }
 
         // Get/Set permissions

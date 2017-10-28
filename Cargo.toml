@@ -1,6 +1,6 @@
 [package]
 name = "zipcs"
-version = "0.3.4"
+version = "0.3.5"
 authors = ["Wspsxing <biluohc@qq.com>"]
 description = "Useful tools collection."
 repository = "https://github.com/biluohc/zipcs"
@@ -20,6 +20,7 @@ requests = "^0.0.30"
 urlparse = "^0.7.3"
 regex  = "^0.2.2"
 encoding = "^0.2"
+filetime = "^0.1"
 chardet = "^0.2"
 rayon = "^0.8.2"
 zip = "^0.2.1"
