@@ -17,6 +17,7 @@ impl Config {
     pub fn parse() {
         let mut config = Self::default();
         let mut list = false;
+        let mut detect = false;
         let charsets = format!(
             "Sets the charset Zipcs using({})\nYou can see all CharSet by `zipcs charset`",
             CHARSETS.replace("_", "").to_lowercase()
@@ -35,6 +36,12 @@ impl Config {
                         .opt(Opt::new("list", &mut list).short('l').long("list").help(
                             "Only list files from ZipArchives",
                         ))
+                        .opt(
+                            Opt::new("detect", &mut detect)
+                                .short('d')
+                                .long("chardet")
+                                .help("Detect the charset for File's name from ZipArchive"),
+                        )
                         .opt(
                             Opt::new("charset", &mut config.zip.charset)
                                 .short('c')
@@ -177,8 +184,18 @@ impl Config {
                 )
                 .parse_args()
         };
-        if list {
-            config.zip.task = Task::LIST;
+        if helper.current_cmd_str() == Some("zip") {
+            if list && detect {
+                helper.help_cmd_err_exit(
+                    helper.current_cmd_ref(),
+                    "Option `--list` conflict with `--chardet`",
+                    1,
+                );
+            } else if list {
+                config.zip.task = Task::List;
+            } else if detect {
+                config.zip.task = Task::Chardet;
+            }
         }
         if *helper.args_len() == 0 {
             helper.help_exit(0);

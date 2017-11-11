@@ -3,6 +3,9 @@ use super::consts::*;
 use zip::result::ZipError;
 use zip::read::ZipArchive;
 use filetime::{FileTime, set_symlink_file_times};
+use encoding::DecoderTrap;
+use encoding::label::encoding_from_whatwg_label;
+use chardet::{detect, charset2encoding};
 // https://docs.rs/filetime/ not follow symlink?
 
 use std::fs::{File, create_dir_all};
@@ -15,12 +18,13 @@ use std;
 
 #[derive(Debug, PartialEq)]
 pub enum Task {
-    LIST, // zipcs -l/--list
-    UNZIP, // Extract files from archive with full paths
+    Chardet, // Detect the charset for File's name from ZipArchive
+    List, // zipcs -l/--list
+    Unzip, // Extract files from archive with full paths
 }
 impl Default for Task {
     fn default() -> Task {
-        Task::UNZIP
+        Task::Unzip
     }
 }
 
@@ -87,9 +91,9 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
     let mut zip_arch = ZipArchive::new(reader)?;
 
     // LIST
-    if *config.task() == Task::LIST {
+    if *config.task() == Task::List {
         for i in 0..zip_arch.len() {
-            let mut file = match zip_arch.by_index(i) {
+            let file = match zip_arch.by_index(i) {
                 Ok(o) => o,
                 Err(e) => {
                     errln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
@@ -112,6 +116,28 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
         return Ok(());
     }
 
+    // Chardet
+    if *config.task() == Task::Chardet {
+        for i in 0..zip_arch.len() {
+            let file = match zip_arch.by_index(i) {
+                Ok(o) => o,
+                Err(e) => {
+                    errln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
+                    continue;
+                }
+            };
+            let charset = detect(file.name_raw());
+            let name = encoding_from_whatwg_label(charset2encoding(&charset.0))
+                .and_then(|enc| enc.decode(file.name_raw(), DecoderTrap::Strict).ok())
+                .unwrap_or_else(|| file.name().to_owned());
+            if name.ends_with('/') {
+                println!("{} ${}-> {:?}", charset.0, i, name);
+            } else {
+                println!("{} ${}-> {:?}: {:?}", charset.0, i, name, file.size());
+            }
+        }
+        return Ok(());
+    }
     // UNZIP
     // Get ouddir
     let outdir = if config.outdir.is_empty() {

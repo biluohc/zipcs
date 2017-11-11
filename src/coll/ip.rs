@@ -46,7 +46,7 @@ impl ReqOnlyRead {
 }
 
 impl AsRef<Request> for ReqOnlyRead {
-    fn as_ref(&self)-> &Request {
+    fn as_ref(&self) -> &Request {
         &self.0
     }
 }
