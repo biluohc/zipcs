@@ -19,20 +19,33 @@ impl RegexList {
         Ok(rl)
     }
     pub fn find<'a>(&self, msg: &'a str) -> Option<&'a str> {
-        for re in self.0.as_slice().iter() {
-            if let Some(mat) = re.find(msg) {
-                let rest = &msg[mat.start()..mat.end()];
+        // ::1应该是最短的吧?
+        let addrs = msg.split('/').filter(|s|s.len()>=3).collect::<Vec<&str>>();
+        debugln!("{:?}",addrs);
+        
+        for addr in addrs {
+            for re in self.0.as_slice().iter() {
+            if let Some(mat) = re.find(addr) {
+                let rest = &addr[mat.start()..mat.end()];
                 debugln!("{:?}\n{:?} -> {:?}\n", re, msg, rest);
                 return Some(rest);
             }
+        } 
         }
         None
     }
     #[allow(dead_code)] // for test
     pub fn find_by_re<'a>(&self, msg: &'a str, idx: usize) -> Option<&'a str> {
-        self.0[idx].find(msg).map(
-            |mat| &msg[mat.start()..mat.end()],
-        )
+        let addrs = msg.split('/').filter(|s|s.len()>=3).collect::<Vec<&str>>();
+        debugln!("{:?}",addrs);
+        
+        for addr in addrs {
+            let rest = self.0[idx].find(addr).map(|mat| &addr[mat.start()..mat.end()]);
+            if rest.is_some() {
+                return rest;
+            }
+        }
+        None
     }
 }
 
