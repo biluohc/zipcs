@@ -9,15 +9,14 @@ readme = "readme.md"
 keywords = ["unzip","charset","zip"]
 license = "MIT"
 
-[profile.release] 
+[profile.release]
 opt-level = 3
-panic = 'unwind'
 # debug = true 
 
 [dependencies]
 lazy_static = "^0.2.8"
-requests = "^0.0.30"
 urlparse = "^0.7.3"
+reqwest = "^0.8.1"
 regex  = "^0.2.2"
 encoding = "^0.2"
 filetime = "^0.1"

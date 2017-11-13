@@ -56,7 +56,7 @@ CAMMANDS:
 extern crate lazy_static;
 extern crate encoding;
 extern crate urlparse;
-extern crate requests;
+extern crate reqwest;
 extern crate chardet;
 extern crate filetime;
 extern crate regex;
