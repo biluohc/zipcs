@@ -26,7 +26,7 @@ fn fun() -> String {
         .map(|s| format!("@rustc{}", s.split(' ').nth(1).unwrap()))
         .unwrap_or_default();
     let git = commit_hash()
-        .map(|s| (&s[0..10]).to_string())
+        .map(|s| (&s[0..8]).to_string())
         .and_then(|s| branch_name().map(|b| format!("{}@{}{} ", s, b, rustc)))
         .unwrap_or_default();
 
@@ -36,7 +36,8 @@ fn fun() -> String {
 
 fn datetime() -> String {
     now_utc()
-        .strftime("%Y-%m-%d/%I:%M:%SUTC")
+        // .strftime("%Y-%m-%d/%I:%M:%SUTC")
+        .strftime("%Y-%m-%dUTC")
         .map(|dt| dt.to_string())
         .unwrap_or_default()
 }
