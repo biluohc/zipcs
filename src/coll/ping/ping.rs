@@ -198,11 +198,8 @@ fn printf_err(msg: &Output, host: &str, host_len_max: usize) {
 
 // #[cfg(windows)]
 fn decode(msg: &[u8]) -> String {
-    let result = detect(msg);
-    if let Some(code) =  encoding_from_whatwg_label(charset2encoding(&result.0)) {
-       if let Ok(str)= code.decode(msg, DecoderTrap::Strict){
-           return str;
-       }
-    }
-    String::from_utf8_lossy(msg).into_owned().to_owned()
+    encoding_from_whatwg_label(charset2encoding(&detect(msg).0))
+        .and_then(|code| code.decode(msg, DecoderTrap::Strict).ok())
+        .unwrap_or(String::from_utf8_lossy(msg).into_owned().to_owned())
 }
+

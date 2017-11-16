@@ -13,11 +13,12 @@ use std::path::PathBuf;
 use std::fs::File;
 use std::env;
 
+/// `include!(concat!(env!("OUT_DIR"), "/zipcs.txt"));`
 fn main() {
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
     let out_path = out_dir.join("zipcs.txt");
-    let file = File::create(&out_path);
-    file.and_then(|mut f| f.write_all(fun().as_bytes()))
+    File::create(&out_path)
+        .and_then(|mut f| f.write_all(fun().as_bytes()))
         .unwrap()
 }
 
@@ -37,41 +38,38 @@ fn fun() -> String {
 fn datetime() -> String {
     now_utc()
         // .strftime("%Y-%m-%d/%I:%M:%SUTC")
-        .strftime("%Y-%m-%dUTC")
-        .map(|dt| dt.to_string())
-        .unwrap_or_default()
+    .strftime("%Y-%m-%dUTC")
+    .map(|dt| dt.to_string())
+    .unwrap_or_default()
 }
 
 fn commit_hash() -> io::Result<String> {
     Cmd::new("git")
         .args(&["rev-parse", "HEAD"])
         .output()
-        .map(|o| o.stdout)
-        .map(|bytes| decode(bytes.as_slice()).trim().to_string())
+        .map(|o| decode_utf8_unchecked(o.stdout))
+        .map(|s| s.trim().to_string())
 }
 
 fn branch_name() -> io::Result<String> {
     Cmd::new("git")
         .args(&["rev-parse", "--abbrev-ref", "HEAD"])
         .output()
-        .map(|o| o.stdout)
-        .map(|bytes| decode(bytes.as_slice()).trim().to_string())
+        .map(|o| decode(o.stdout.as_slice()).trim().to_string())
 }
 
 fn rustc_version() -> io::Result<String> {
-    Cmd::new("rustc")
-        .arg("--version")
-        .output()
-        .map(|o| o.stdout)
-        .map(|bytes| decode(bytes.as_slice()).trim().to_string())
+    Cmd::new("rustc").arg("--version").output().map(|o| {
+        decode_utf8_unchecked(o.stdout).trim().to_string()
+    })
 }
 
-fn decode(msg: &[u8]) -> String {
-    let result = detect(msg);
-    if let Some(code) = encoding_from_whatwg_label(charset2encoding(&result.0)) {
-        if let Ok(str) = code.decode(msg, DecoderTrap::Strict) {
-            return str;
-        }
-    }
-    String::from_utf8_lossy(msg).into_owned().to_owned()
+fn decode_utf8_unchecked(bytes: Vec<u8>) -> String {
+    unsafe { String::from_utf8_unchecked(bytes) }
+}
+
+fn decode(bytes: &[u8]) -> String {
+    encoding_from_whatwg_label(charset2encoding(&detect(bytes).0))
+        .and_then(|code| code.decode(bytes, DecoderTrap::Strict).ok())
+        .unwrap_or(String::from_utf8_lossy(bytes).into_owned().to_owned())
 }
