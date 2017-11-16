@@ -1,7 +1,8 @@
 #![allow(unknown_lints,const_static_lifetime)]
 // crate's info
 pub const NAME: &'static str = env!("CARGO_PKG_NAME");
-pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+// pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+include!(concat!(env!("OUT_DIR"), "/zipcs.txt"));
 pub const AUTHOR: &'static str = "Wspsxing";
 pub const EMAIL: &'static str = "biluohc@qq.com";
 pub const DESC: &'static str = env!("CARGO_PKG_DESCRIPTION");

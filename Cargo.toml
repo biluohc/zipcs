@@ -8,10 +8,16 @@ repository = "https://github.com/biluohc/zipcs"
 readme = "readme.md"
 keywords = ["unzip","charset","zip"]
 license = "MIT"
+build = "build.rs"
 
 [profile.release]
 opt-level = 3
 # debug = true 
+
+[build-dependencies]
+encoding = "^0.2"
+chardet = "^0.2"
+time = "^0.1"
 
 [dependencies]
 lazy_static = "^0.2.8"
