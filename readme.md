@@ -6,7 +6,7 @@
 
 ```sh
  cargo install --git https://github.com/biluohc/zipcs
- zipcs -h
+ zcs -h
 ```
 
 ### Or
@@ -16,19 +16,19 @@ git clone https://github.com/biluohc/zipcs
 cd zipcs
 cargo build --release
 
-./target/release/zipcs --help
+./target/release/zcs --help
 ```
 ### Help
 
 ```sh
-zipcs 0.3.5
+zcs 0.3.5 (ea183538@master@rustc1.23.0-nightly 2017-11-17UTC)
 Useful tools collection.
 Wspsxing <biluohc@qq.com>
 Repo: https://github.com/biluohc/zipcs
 
 USAGE:
-   zipcs options
-   zipcs <command> [args]
+   zcs options
+   zcs <command> [args]
 
 OPTIONS:
    -h, --help          Show the help message

@@ -1,12 +1,12 @@
 [package]
-name = "zipcs"
+name = "zcs"
 version = "0.3.5"
 authors = ["Wspsxing <biluohc@qq.com>"]
 description = "Useful tools collection."
 repository = "https://github.com/biluohc/zipcs"
 # documentation = "https://docs.rs/zipcs/"
 readme = "readme.md"
-keywords = ["unzip","charset","zip"]
+keywords = ["unzip","charset","ping", "url", "ip"]
 license = "MIT"
 build = "build.rs"
 
