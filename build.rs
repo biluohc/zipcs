@@ -37,7 +37,7 @@ fn fun() -> String {
 
 fn datetime() -> String {
     now_utc()
-        // .strftime("%Y-%m-%d/%I:%M:%SUTC")
+    // .strftime("%Y-%m-%d/%I:%M:%SUTC")
     .strftime("%Y-%m-%dUTC")
     .map(|dt| dt.to_string())
     .unwrap_or_default()
@@ -71,5 +71,5 @@ fn decode_utf8_unchecked(bytes: Vec<u8>) -> String {
 fn decode(bytes: &[u8]) -> String {
     encoding_from_whatwg_label(charset2encoding(&detect(bytes).0))
         .and_then(|code| code.decode(bytes, DecoderTrap::Strict).ok())
-        .unwrap_or(String::from_utf8_lossy(bytes).into_owned().to_owned())
+        .unwrap_or_else(|| String::from_utf8_lossy(bytes).into_owned().to_owned())
 }

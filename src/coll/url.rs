@@ -11,25 +11,20 @@ pub struct Urls {
 impl Urls {
     pub fn call(self) {
         for str in &self.strs {
-            let rest = if self.is_encode && self.is_plus {
-                quote_plus(str, b"")
-            } else if self.is_encode {
-                quote(str, b"")
-            } else if self.is_plus {
-                unquote_plus(str)
-            } else {
-                unquote(str)
+            let rest = match (self.is_encode, self.is_plus) {
+                (true, true) => quote_plus(str, b""),
+                (true, false) => quote(str, b""),
+                (false, true) => unquote_plus(str),
+                (false, false) => unquote(str),
             };
             match rest {
                 Ok(o) => {
                     println!("{}", o);
                 }
                 Err(o) => {
-                    errln!("{:?}", o);
+                    eprintln!("{:?}", o);
                 }
             }
-
         }
-
     }
 }

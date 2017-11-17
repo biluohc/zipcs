@@ -152,16 +152,14 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
     // Check and create oudir
     let outdir_path = Path::new(&outdir);
     if outdir_path.exists() && outdir_path.is_dir() {
-        if read_dir(&outdir_path)
-            .map_err(|e| {
-                format!(
-                    "Reading OutDir({}) occurs error: {}",
-                    outdir_path.display(),
-                    e.description()
-                )
-            })?
-            .count() != 0
-        {
+        let dir_item = read_dir(&outdir_path).map_err(|e| {
+            format!(
+                "Reading OutDir({}) occurs error: {}",
+                outdir_path.display(),
+                e.description()
+            )
+        })?;
+        if dir_item.count() != 0 {
             Err(format!("OutDir({}) is not empty!", outdir_path.display()))?;
         }
     } else if outdir_path.exists() && !outdir_path.is_dir() {
