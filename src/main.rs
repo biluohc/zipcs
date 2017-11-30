@@ -63,9 +63,11 @@ extern crate regex;
 extern crate rayon;
 extern crate zip;
 
-#[macro_use]
-extern crate stderr;
 extern crate app;
+#[macro_use]
+extern crate log;
+extern crate mxo_env_logger;
+use mxo_env_logger::init;
 
 mod coll;
 pub mod consts;
@@ -73,6 +75,6 @@ mod args;
 use args::Config;
 
 fn main() {
-    logger_init!();
+    init().expect("Init log failed");
     Config::parse();
 }

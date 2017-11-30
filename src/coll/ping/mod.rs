@@ -23,13 +23,13 @@ impl RegexList {
         let addrs = msg.split('/')
             .filter(|s| s.len() >= 3)
             .collect::<Vec<&str>>();
-        debugln!("{:?}", addrs);
+        debug!("{:?}", addrs);
 
         for addr in addrs {
             for re in self.0.as_slice().iter() {
                 if let Some(mat) = re.find(addr) {
                     let rest = &addr[mat.start()..mat.end()];
-                    debugln!("{:?}\n{:?} -> {:?}\n", re, msg, rest);
+                    debug!("{:?}\n{:?} -> {:?}\n", re, msg, rest);
                     return Some(rest);
                 }
             }
@@ -41,7 +41,7 @@ impl RegexList {
         let addrs = msg.split('/')
             .filter(|s| s.len() >= 3)
             .collect::<Vec<&str>>();
-        debugln!("{:?}", addrs);
+        debug!("{:?}", addrs);
 
         for addr in addrs {
             let rest = self.0[idx].find(addr).map(

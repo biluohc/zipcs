@@ -37,7 +37,7 @@ impl Pings {
         Ok(())
     }
     pub fn call(self) {
-        dbstln!("{:?}",self);
+        debug!("{:?}",self);
         let host_len_max = self.hosts.as_slice().iter().max_by_key(|p|p.len()).unwrap().len();
         // sleep sort
         let mut childs = self.hosts.as_slice().iter()
@@ -133,7 +133,7 @@ fn printf0(msg: &Output, only_line: bool, host: &str, host_len_max: usize) {
     }
 
     let vs: Vec<String> = msg.lines().map(|s| s.trim().to_string()).collect(); 
-    dbstln!("{:?}", msg);
+    debug!("{:?}", msg);
 
     #[cfg(unix)]    
     assert!(!vs.len()>2);   
@@ -164,7 +164,7 @@ fn printf1(msg: &Output, only_line: bool, host: &str, host_len_max: usize) {
     }
 
     let vs: Vec<String> = msg.lines().map(|s| s.trim().to_string()).collect(); 
-    dbstln!("{:?}", msg);
+    debug!("{:?}", msg);
 
     #[cfg(unix)]    
     assert!(!vs.len()>2);   
@@ -188,7 +188,7 @@ fn printf_err(msg: &Output, host: &str, host_len_max: usize) {
         .collect();
     assert!(!vs.is_empty());
 
-    errln!("{}: {}", space_fix(host, host_len_max), vs[vs.len() - 1]);
+    eprintln!("{}: {}", space_fix(host, host_len_max), vs[vs.len() - 1]);
 }
 
 // #[cfg(unix)]

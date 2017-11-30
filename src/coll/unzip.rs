@@ -61,7 +61,7 @@ impl Zips {
         Ok(())
     }
     pub fn call(self) -> Result<(), String> {
-        dbln!("Config_zip: {:?}", self);
+        debug!("Config_zip: {:?}", self);
 
         for zip_arch_path in self.zips() {
             if let Err(e) = for_zip_arch_file(zip_arch_path, &self) {
@@ -96,7 +96,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
             let file = match zip_arch.by_index(i) {
                 Ok(o) => o,
                 Err(e) => {
-                    errln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
+                    eprintln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
                     continue;
                 }
             };
@@ -122,7 +122,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
             let file = match zip_arch.by_index(i) {
                 Ok(o) => o,
                 Err(e) => {
-                    errln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
+                    eprintln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
                     continue;
                 }
             };
@@ -172,7 +172,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
         let mut file = match zip_arch.by_index(i) {
             Ok(o) => o,
             Err(e) => {
-                errln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
+                eprintln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
                 continue;
             }
         };

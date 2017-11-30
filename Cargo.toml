@@ -12,6 +12,7 @@ build = "build.rs"
 
 [profile.release]
 opt-level = 3
+lto = true
 # debug = true 
 
 [build-dependencies]
@@ -20,6 +21,7 @@ chardet = "^0.2"
 time = "^0.1"
 
 [dependencies]
+mxo_env_logger = "^0.1"
 lazy_static = "^0.2.8"
 urlparse = "^0.7.3"
 reqwest = "^0.8.1"
@@ -29,12 +31,9 @@ filetime = "^0.1"
 chardet = "^0.2"
 rayon = "^0.8.2"
 zip = "^0.2.1"
-
-stderr = "0.8.0"
+log = "^0.3.8"
 app = "0.6.3"
 
-# stderr = { git="https://github.com/biluohc/stderr", version= "0.7.1" }
-# stderr = { path = "../stderr" }
 # app = { git = "https://github.com/biluohc/app", branch="master", version ="0.6.0" }
 # app = { path = "../app" }
 

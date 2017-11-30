@@ -13,7 +13,7 @@ pub struct CharDet {
 
 impl CharDet {
     pub fn call(self) {
-        dbln!("{:?}", self);
+        debug!("{:?}", self);
         let max_len = self.files
             .as_slice()
             .iter()
@@ -37,7 +37,7 @@ impl CharDet {
                     info
                 );
             }
-            Err(e) => errln!("{}: {:?}", space_fix(file, max_len), e),
+            Err(e) => eprintln!("{}: {:?}", space_fix(file, max_len), e),
         })
     }
     pub fn check(&self) -> Result<(), String> {

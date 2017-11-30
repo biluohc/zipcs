@@ -22,11 +22,11 @@ impl Files {
         Ok(())
     }
     pub fn call(self) {
-        dbstln!("Config_file_: {:?}", self);
+        debug!("Config_file_: {:?}", self);
 
         for str in &self.strs {
             if let Err(e) = file_handle(str, &self) {
-                errln!("{}", e);
+                eprintln!("{}", e);
                 exit(1);
             }
         }

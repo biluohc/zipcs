@@ -24,18 +24,18 @@ fn main() {
 
 fn fun() -> String {
     let rustc = rustc_version()
-        .map(|s| format!("@rustc{}", s.split(' ').nth(1).unwrap()))
+        .map(|s| format!(" rustc{}", s.split(' ').nth(1).unwrap()))
         .unwrap_or_default();
     let git = commit_hash()
         .map(|s| (&s[0..8]).to_string())
         .and_then(|s| branch_name().map(|b| format!("{}@{}{} ", s, b, rustc)))
         .unwrap_or_default();
 
-    let version = format!("{} ({}{})", env!("CARGO_PKG_VERSION"), git, datetime());
+    let version = format!("{} ({}{})", env!("CARGO_PKG_VERSION"), git, date_time());
     format!("pub const VERSION: &'static str = \"{}\";", version)
 }
 
-fn datetime() -> String {
+fn date_time() -> String {
     now_utc()
     // .strftime("%Y-%m-%d/%I:%M:%SUTC")
     .strftime("%Y-%m-%dUTC")

@@ -2,9 +2,9 @@ use super::consts::*;
 
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
-use std::path::{Path, PathBuf};
-use std::ffi::OsString;
+use std::path::{Path, PathBuf, Component};
 use std::process::exit;
+use std::ffi::OsStr;
 use std::error::Error;
 use std::borrow::Cow;
 use std::fs::rename;
@@ -27,11 +27,11 @@ impl Paths {
         Ok(())
     }
     pub fn call(self) {
-        dbstln!("Config_path: {:?}", self);
+        debug!("Config_path: {:?}", self);
         let depth = self.depth;
         for str in &self.strs {
-            if let Err(e) = path_recurse(Path::new(str).to_owned().into_os_string(), depth, &self) {
-                errln!("{}", e);
+            if let Err(e) = path_recurse(PathBuf::from(str), depth, &self) {
+                eprintln!("{}", e);
                 exit(1);
             }
         }
@@ -50,25 +50,35 @@ impl Default for Paths {
     }
 }
 
-fn path_recurse(path: OsString, mut depth: Option<usize>, config: &Paths) -> Result<(), String> {
-    let path_decode_result = decode(&path, &config.charset);
-    if config.charset != CharSet::UTF_8 && path_decode_result.is_ok() {
-        let str = path_decode_result.unwrap();
-        let ne = ne(&str, &path);
-        if config.store && ne {
-            rename(&path, &str).map_err(|e| {
-                format!("{:?} rename fails: {}", path, e.description())
-            })?;
-            println!("{:?} -> {:?}", path, str);
-        } else {
-            println!("{:?} : {:?}", path, str);
+fn path_recurse(mut path: PathBuf, mut depth: Option<usize>, config: &Paths) -> Result<(), String> {
+    let components_last = path.components().last().unwrap().as_os_str().to_os_string();
+    let components_last = Component::Normal(components_last.as_os_str());
+    match components_last {
+        Component::Normal(os_str) => {
+            match decode(os_str, &config.charset) {
+                Ok(file_name) => {
+                    let mut path_new = path.clone();
+                    assert!(path_new.pop());
+                    path_new.push(&file_name);
+                    println!("{:?}", path_new);
+                    if config.store && ne(&file_name, os_str) {
+                        rename(&path, &file_name).map_err(|e| {
+                            format!("rename fails: {}: {:?}", e.description(), path)
+                        })?;
+                        path = path_new;
+                    }
+                }
+                Err(_) => {
+                    eprintln!("decode failed by {:?}: {:?} ", config.charset, path);
+                }
+            }
         }
-    } else {
-        println!("{:?}", path);
+        _ => {
+            println!("{:?}", path);
+        }
     }
 
     // -d/--depth
-    let path = PathBuf::from(path);
     if !path.as_path().is_dir() || depth.as_ref() == Some(&0) {
         return Ok(());
     }
@@ -91,28 +101,28 @@ fn path_recurse(path: OsString, mut depth: Option<usize>, config: &Paths) -> Res
         let entry = entry.map_err(|ref e| {
             format!("{:?}'s entry read fails: {}", path, e.description())
         })?;
-        dbstln!("{:?}", entry.path());
-        path_recurse(entry.path().into_os_string(), depth, config)?;
+        debug!("{:?}", entry.path());
+        path_recurse(entry.path(), depth, config)?;
     }
     Ok(())
 }
 
 #[cfg(unix)]
-fn decode(path: &OsString, cs: &CharSet) -> Result<String, Cow<'static, str>> {
+fn decode(path: &OsStr, cs: &CharSet) -> Result<String, Cow<'static, str>> {
     cs.decode(path.as_bytes())
 }
 #[cfg(windows)]
-fn decode(path: &OsString, cs: &CharSet) -> Result<String, Cow<'static, str>> {
+fn decode(path: &OsStr, cs: &CharSet) -> Result<String, Cow<'static, str>> {
     cs.decode(path.to_string_lossy().as_bytes())
 }
 
 // no-equal
 #[cfg(unix)]
-fn ne(str: &str, path: &OsString) -> bool {
+fn ne(str: &str, path: &OsStr) -> bool {
     str.as_bytes() != path.as_bytes()
 }
 
 #[cfg(windows)]
-fn ne(str: &str, path: &OsString) -> bool {
+fn ne(str: &str, path: &OsStr) -> bool {
     str.as_bytes() != path.to_string_lossy().as_bytes()
 }

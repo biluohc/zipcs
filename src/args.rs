@@ -205,7 +205,7 @@ impl Config {
         }
     }
     fn check_fix_call(mut self, cmd: Option<&str>) -> Result<(), String> {
-        dbstln!("Config: {:?}: {:?}", cmd, self);
+        debug!("Config: {:?}: {:?}", cmd, self);
         match cmd {
             Some("zip") => {
                 self.zip.check_fix()?;
