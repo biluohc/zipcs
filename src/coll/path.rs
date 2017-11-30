@@ -62,7 +62,7 @@ fn path_recurse(mut path: PathBuf, mut depth: Option<usize>, config: &Paths) -> 
                     path_new.push(&file_name);
                     println!("{:?}", path_new);
                     if config.store && ne(&file_name, os_str) {
-                        rename(&path, &file_name).map_err(|e| {
+                        rename(&path, &path_new).map_err(|e| {
                             format!("rename fails: {}: {:?}", e.description(), path)
                         })?;
                         path = path_new;
