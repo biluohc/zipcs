@@ -3,7 +3,7 @@ use chardet::detect;
 
 use super::consts::space_fix;
 use std::path::Path;
-use std::io::{self, Read, BufReader};
+use std::io::{self, BufReader, Read};
 use std::fs::File;
 
 #[derive(Debug, Default)]

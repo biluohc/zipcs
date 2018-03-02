@@ -20,7 +20,7 @@ cargo build --release
 ## Help
 
 ```sh
-zcs 0.3.5 (ea183538@master@rustc1.23.0-nightly 2017-11-17UTC)
+zcs 0.3.6 (594c5ca7@master rustc1.25.0-nightly 2018-03-02UTC)
 Useful tools collection.
 Wspsxing <biluohc@qq.com>
 Repo: https://github.com/biluohc/zipcs
@@ -52,15 +52,15 @@ CAMMANDS:
 * 所依赖的[zip-rs](https://github.com/mvdnes/zip-rs)库目前不支持加密,所以目前不支持密码。
 */
 
+extern crate chardet;
+extern crate encoding;
+extern crate filetime;
 #[macro_use]
 extern crate lazy_static;
-extern crate encoding;
-extern crate urlparse;
-extern crate reqwest;
-extern crate chardet;
-extern crate filetime;
-extern crate regex;
+extern crate percent_encoding;
 extern crate rayon;
+extern crate regex;
+extern crate reqwest;
 extern crate zip;
 
 extern crate app;

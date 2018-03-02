@@ -21,7 +21,7 @@ cargo build --release
 ### Help
 
 ```sh
-zcs 0.3.5 (ea183538@master@rustc1.23.0-nightly 2017-11-17UTC)
+zcs 0.3.6 (594c5ca7@master rustc1.25.0-nightly 2018-03-02UTC)
 Useful tools collection.
 Wspsxing <biluohc@qq.com>
 Repo: https://github.com/biluohc/zipcs

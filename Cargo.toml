@@ -1,6 +1,6 @@
 [package]
 name = "zcs"
-version = "0.3.5"
+version = "0.3.6"
 authors = ["Wspsxing <biluohc@qq.com>"]
 description = "Useful tools collection."
 repository = "https://github.com/biluohc/zipcs"
@@ -21,19 +21,22 @@ chardet = "^0.2"
 time = "^0.1"
 
 [dependencies]
+percent-encoding = "^1.0"
 mxo_env_logger = "^0.1"
-lazy_static = "^0.2.8"
-urlparse = "^0.7.3"
+lazy_static = "^1.0"
 reqwest = "^0.8.1"
 regex  = "^0.2.2"
 encoding = "^0.2"
 filetime = "^0.1"
 chardet = "^0.2"
-rayon = "^0.8.2"
-zip = "^0.2.1"
+rayon = "^1.0"
+zip = "^0.3"
 log = "^0.3.8"
-app = "0.6.3"
 
-# app = { git = "https://github.com/biluohc/app", branch="master", version ="0.6.0" }
-# app = { path = "../app" }
+[dependencies.app]
+version = "0.6.5"
+# path = "../app" 
+# git = "https://github.com/biluohc/app"
+# branch = "master" 
+# commit = ""
 

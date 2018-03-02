@@ -2,13 +2,13 @@ use super::consts::*;
 
 use zip::result::ZipError;
 use zip::read::ZipArchive;
-use filetime::{FileTime, set_symlink_file_times};
+use filetime::{set_symlink_file_times, FileTime};
 use encoding::DecoderTrap;
 use encoding::label::encoding_from_whatwg_label;
 use chardet::{detect, charset2encoding};
 // https://docs.rs/filetime/ not follow symlink?
 
-use std::fs::{File, create_dir_all};
+use std::fs::{create_dir_all, File};
 use std::io::{copy, BufReader};
 use std::ffi::OsString;
 use std::error::Error;
@@ -19,8 +19,8 @@ use std;
 #[derive(Debug, PartialEq)]
 pub enum Task {
     Chardet, // Detect the charset for File's name from ZipArchive
-    List, // zipcs -l/--list
-    Unzip, // Extract files from archive with full paths
+    List,    // zipcs -l/--list
+    Unzip,   // Extract files from archive with full paths
 }
 impl Default for Task {
     fn default() -> Task {
@@ -30,10 +30,10 @@ impl Default for Task {
 
 #[derive(Debug, Default)]
 pub struct Zips {
-    pub charset: CharSet, //zip -cs/--charset   //utf-8
-    pub outdir: String, //zipcs -o/--outdir   //./
+    pub charset: CharSet,  //zip -cs/--charset   //utf-8
+    pub outdir: String,    //zipcs -o/--outdir   //./
     pub zips: Vec<String>, //zipcs ZipArchive0 ZipArchive1 ...
-    pub task: Task, // UNZIP
+    pub task: Task,        // UNZIP
 }
 impl Zips {
     pub fn check_fix(&mut self) -> Result<(), String> {
@@ -45,8 +45,7 @@ impl Zips {
             } else if path.is_dir() {
                 return Err(format!(
                     "Arguments({}): \"{:?}\" is a directory",
-                    name,
-                    path
+                    name, path
                 ));
             }
             File::open(path).map_err(|e| {
@@ -223,7 +222,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
-            use std::fs::{Permissions, set_permissions};
+            use std::fs::{set_permissions, Permissions};
 
             if let Some(mode) = file.unix_mode() {
                 set_permissions(&path, Permissions::from_mode(mode)).map_err(|e| {

@@ -1,5 +1,5 @@
-extern crate encoding;
 extern crate chardet;
+extern crate encoding;
 extern crate time;
 
 use encoding::label::encoding_from_whatwg_label;
@@ -59,9 +59,10 @@ fn branch_name() -> io::Result<String> {
 }
 
 fn rustc_version() -> io::Result<String> {
-    Cmd::new("rustc").arg("--version").output().map(|o| {
-        decode_utf8_unchecked(o.stdout).trim().to_string()
-    })
+    Cmd::new("rustc")
+        .arg("--version")
+        .output()
+        .map(|o| decode_utf8_unchecked(o.stdout).trim().to_string())
 }
 
 fn decode_utf8_unchecked(bytes: Vec<u8>) -> String {

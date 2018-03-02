@@ -2,7 +2,7 @@ use super::consts::*;
 
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
-use std::path::{Path, PathBuf, Component};
+use std::path::{Component, Path, PathBuf};
 use std::process::exit;
 use std::ffi::OsStr;
 use std::error::Error;
@@ -54,25 +54,21 @@ fn path_recurse(mut path: PathBuf, mut depth: Option<usize>, config: &Paths) -> 
     let components_last = path.components().last().unwrap().as_os_str().to_os_string();
     let components_last = Component::Normal(components_last.as_os_str());
     match components_last {
-        Component::Normal(os_str) => {
-            match decode(os_str, &config.charset) {
-                Ok(file_name) => {
-                    let mut path_new = path.clone();
-                    assert!(path_new.pop());
-                    path_new.push(&file_name);
-                    println!("{:?}", path_new);
-                    if config.store && ne(&file_name, os_str) {
-                        rename(&path, &path_new).map_err(|e| {
-                            format!("rename fails: {}: {:?}", e.description(), path)
-                        })?;
-                        path = path_new;
-                    }
-                }
-                Err(_) => {
-                    eprintln!("decode failed by {:?}: {:?} ", config.charset, path);
+        Component::Normal(os_str) => match decode(os_str, &config.charset) {
+            Ok(file_name) => {
+                let mut path_new = path.clone();
+                assert!(path_new.pop());
+                path_new.push(&file_name);
+                println!("{:?}", path_new);
+                if config.store && ne(&file_name, os_str) {
+                    rename(&path, &path_new).map_err(|e| format!("rename fails: {}: {:?}", e.description(), path))?;
+                    path = path_new;
                 }
             }
-        }
+            Err(_) => {
+                eprintln!("decode failed by {:?}: {:?} ", config.charset, path);
+            }
+        },
         _ => {
             println!("{:?}", path);
         }
@@ -85,22 +81,20 @@ fn path_recurse(mut path: PathBuf, mut depth: Option<usize>, config: &Paths) -> 
 
     // -l/--link
     if !config.link {
-        let metadata = path.as_path().symlink_metadata().map_err(|e| {
-            format!("{:?} read without symlink fails: {}", path, e)
-        })?;
+        let metadata = path.as_path()
+            .symlink_metadata()
+            .map_err(|e| format!("{:?} read without symlink fails: {}", path, e))?;
         if !metadata.is_dir() {
             return Ok(());
         }
     }
     depth = depth.map(|d| d - 1);
 
-    for entry in path.as_path().read_dir().map_err(|e| {
-        format!("{:?} read fails: {}", path, e.description())
-    })?
+    for entry in path.as_path()
+        .read_dir()
+        .map_err(|e| format!("{:?} read fails: {}", path, e.description()))?
     {
-        let entry = entry.map_err(|ref e| {
-            format!("{:?}'s entry read fails: {}", path, e.description())
-        })?;
+        let entry = entry.map_err(|ref e| format!("{:?}'s entry read fails: {}", path, e.description()))?;
         debug!("{:?}", entry.path());
         path_recurse(entry.path(), depth, config)?;
     }
