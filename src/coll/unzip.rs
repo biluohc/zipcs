@@ -1,20 +1,20 @@
 use super::consts::*;
 
-use zip::result::ZipError;
-use zip::read::ZipArchive;
-use filetime::{set_symlink_file_times, FileTime};
-use encoding::DecoderTrap;
+use chardet::{charset2encoding, detect};
 use encoding::label::encoding_from_whatwg_label;
-use chardet::{detect, charset2encoding};
+use encoding::DecoderTrap;
+use filetime::{set_symlink_file_times, FileTime};
+use zip::read::ZipArchive;
+use zip::result::ZipError;
 // https://docs.rs/filetime/ not follow symlink?
 
+use std;
+use std::error::Error;
+use std::ffi::OsString;
+use std::fs::read_dir;
 use std::fs::{create_dir_all, File};
 use std::io::{copy, BufReader};
-use std::ffi::OsString;
-use std::error::Error;
-use std::fs::read_dir;
 use std::path::Path;
-use std;
 
 #[derive(Debug, PartialEq)]
 pub enum Task {
@@ -206,7 +206,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
         #[allow(unused_must_use)]
         {
             let tm = file.last_modified().to_timespec();
-            let tm = FileTime::from_seconds_since_1970(tm.sec as u64, tm.nsec as u32);
+            let tm = FileTime::from_unix_time(tm.sec, tm.nsec as u32);
             set_symlink_file_times(&path, tm, tm).map_err(|e| {
                 eprintln!(
                     "filetime::set_symlink_file_times({}, {:?}) occurs error: {}",
@@ -221,8 +221,8 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
         #[allow(unused_must_use)]
         #[cfg(unix)]
         {
-            use std::os::unix::fs::PermissionsExt;
             use std::fs::{set_permissions, Permissions};
+            use std::os::unix::fs::PermissionsExt;
 
             if let Some(mode) = file.unix_mode() {
                 set_permissions(&path, Permissions::from_mode(mode)).map_err(|e| {
