@@ -129,7 +129,7 @@ impl Config {
                                 .help("stop after sending count ECHO_REQUEST packets"),
                         )
                         .opt(
-                            Opt::new("_6", &mut config.ping._6)
+                            Opt::new("_6", &mut config.ping.v6)
                                 .short('6')
                                 .help("use IPV6"),
                         )
