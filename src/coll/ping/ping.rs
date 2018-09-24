@@ -50,6 +50,7 @@ impl Pings {
             let fut = output
                 .map_err(|e| error!("Running ping command failed: {:?}", e))
                 .map(move |output| callback(output, host, only_line, host_len_max));
+                
             futs.push(fut);
         }
 

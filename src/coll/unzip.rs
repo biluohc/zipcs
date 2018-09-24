@@ -43,19 +43,9 @@ impl Zips {
             if !path.exists() {
                 return Err(format!("Arguments({}): \"{:?}\" is not exists", name, path));
             } else if path.is_dir() {
-                return Err(format!(
-                    "Arguments({}): \"{:?}\" is a directory",
-                    name, path
-                ));
+                return Err(format!("Arguments({}): \"{:?}\" is a directory", name, path));
             }
-            File::open(path).map_err(|e| {
-                format!(
-                    "Arguments({}): \"{:?}\" is invalid({})",
-                    name,
-                    path,
-                    e.description()
-                )
-            })?;
+            File::open(path).map_err(|e| format!("Arguments({}): \"{:?}\" is invalid({})", name, path, e.description()))?;
         }
         Ok(())
     }
@@ -151,13 +141,8 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
     // Check and create oudir
     let outdir_path = Path::new(&outdir);
     if outdir_path.exists() && outdir_path.is_dir() {
-        let dir_item = read_dir(&outdir_path).map_err(|e| {
-            format!(
-                "Reading OutDir({}) occurs error: {}",
-                outdir_path.display(),
-                e.description()
-            )
-        })?;
+        let dir_item = read_dir(&outdir_path)
+            .map_err(|e| format!("Reading OutDir({}) occurs error: {}", outdir_path.display(), e.description()))?;
         if dir_item.count() != 0 {
             Err(format!("OutDir({}) is not empty!", outdir_path.display()))?;
         }

@@ -4,11 +4,7 @@ use reqwest::{header, Client};
 use std::error::Error;
 use std::io::Read;
 
-static HOSTS: &'static [&str] = &[
-    "http://ip.cn/",
-    "http://myip.ipip.net/",
-    "http://ipinfo.io/",
-];
+static HOSTS: &'static [&str] = &["http://ip.cn/", "http://myip.ipip.net/", "http://ipinfo.io/"];
 // curl ip.cn -v
 static UA: &'static str = "curl/7.54.0";
 static ACCEPT: &'static str = "Accept: */*";

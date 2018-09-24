@@ -24,8 +24,8 @@ pub fn space_fix(msg: &str, msg_len_max: usize) -> String {
 // https://docs.rs/encoding/0.2.33/encoding/all/index.html
 use encoding::all::*;
 use encoding::{DecoderTrap, EncoderTrap, Encoding};
-use std::default::Default;
 use std::borrow::Cow;
+use std::default::Default;
 
 impl Default for CharSet {
     fn default() -> CharSet {

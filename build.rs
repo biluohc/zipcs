@@ -2,16 +2,16 @@ extern crate chardet;
 extern crate encoding;
 extern crate time;
 
+use chardet::{charset2encoding, detect};
 use encoding::label::encoding_from_whatwg_label;
-use chardet::{detect, charset2encoding};
 use encoding::DecoderTrap;
 use time::now_utc;
 
-use std::process::Command as Cmd;
+use std::env;
+use std::fs::File;
 use std::io::{self, Write};
 use std::path::PathBuf;
-use std::fs::File;
-use std::env;
+use std::process::Command as Cmd;
 
 /// `include!(concat!(env!("OUT_DIR"), "/zipcs.txt"));`
 fn main() {
@@ -38,10 +38,10 @@ fn fun() -> String {
 // date --help
 fn date_time() -> String {
     now_utc()
-    // .strftime("%Y-%m-%d/%H:%M:%SUTC")
-    .strftime("%Y-%m-%dUTC")
-    .map(|dt| dt.to_string())
-    .unwrap_or_default()
+        // .strftime("%Y-%m-%d/%H:%M:%SUTC")
+        .strftime("%Y-%m-%dUTC")
+        .map(|dt| dt.to_string())
+        .unwrap_or_default()
 }
 
 fn commit_hash() -> io::Result<String> {

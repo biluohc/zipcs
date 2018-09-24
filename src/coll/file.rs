@@ -1,8 +1,8 @@
 use super::consts::*;
-use std::io::{Read, Write};
-use std::process::exit;
-use std::path::Path;
 use std::fs::File;
+use std::io::{Read, Write};
+use std::path::Path;
+use std::process::exit;
 
 #[derive(Debug, Default)]
 pub struct Files {
@@ -36,7 +36,8 @@ impl Files {
 fn file_handle(file_name: &str, config: &Files) -> Result<(), String> {
     let mut file = File::open(file_name).map_err(|e| format!("{:?} open fails: {}", file_name, e))?;
     let mut bytes = Vec::new();
-    let _ = file.read_to_end(&mut bytes)
+    let _ = file
+        .read_to_end(&mut bytes)
         .map_err(|e| format!("{:?} read fails: {}", file_name, e))?;
     let read_result = config.charset.decode(&bytes[..]);
     let str = {
@@ -52,8 +53,7 @@ fn file_handle(file_name: &str, config: &Files) -> Result<(), String> {
                 let mut file = File::create(file_name).map_err(|e| format!("{:?} create fails: {}", file_name, e))?;
                 file.write_all(&bs[..])
                     .map_err(|e| format!("{:?} write fails: {}", file_name, e))?;
-                file.flush()
-                    .map_err(|e| format!("{:?} flush fails: {}", file_name, e))?;
+                file.flush().map_err(|e| format!("{:?} flush fails: {}", file_name, e))?;
                 println!("{:?} rewrite success", file_name);
             } else {
                 println!("{:?}: \n{}\n", file_name, String::from_utf8_lossy(&bs[..]));

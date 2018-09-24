@@ -1,10 +1,10 @@
-use rayon::prelude::*;
 use chardet::detect;
+use rayon::prelude::*;
 
 use super::consts::space_fix;
-use std::path::Path;
-use std::io::{self, BufReader, Read};
 use std::fs::File;
+use std::io::{self, BufReader, Read};
+use std::path::Path;
 
 #[derive(Debug, Default)]
 pub struct CharDet {
@@ -14,12 +14,7 @@ pub struct CharDet {
 impl CharDet {
     pub fn call(self) {
         debug!("{:?}", self);
-        let max_len = self.files
-            .as_slice()
-            .iter()
-            .max_by_key(|p| p.len())
-            .unwrap()
-            .len();
+        let max_len = self.files.as_slice().iter().max_by_key(|p| p.len()).unwrap().len();
         // println!("{}{:3}CharSet{:13}Rate{:8}Info", space_fix("File",max_len), "", "", "");
         self.files.par_iter().for_each(|file| match chardet(file) {
             Ok(o) => {

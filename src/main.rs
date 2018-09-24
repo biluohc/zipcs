@@ -57,20 +57,20 @@ extern crate encoding;
 extern crate filetime;
 #[macro_use]
 extern crate lazy_static;
+extern crate futures;
 extern crate percent_encoding;
 extern crate rayon;
 extern crate regex;
 extern crate reqwest;
-extern crate zip;
 extern crate tokio;
 extern crate tokio_process;
-extern crate futures;
+extern crate zip;
 
 extern crate app;
 #[macro_use]
 extern crate log;
-extern crate fern;
 extern crate chrono;
+extern crate fern;
 
 pub mod args;
 pub mod coll;

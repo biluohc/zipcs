@@ -1,13 +1,13 @@
 use super::consts::*;
 
+use std::borrow::Cow;
+use std::error::Error;
+use std::ffi::OsStr;
+use std::fs::rename;
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
 use std::path::{Component, Path, PathBuf};
 use std::process::exit;
-use std::ffi::OsStr;
-use std::error::Error;
-use std::borrow::Cow;
-use std::fs::rename;
 
 #[derive(Debug)]
 pub struct Paths {
@@ -81,7 +81,8 @@ fn path_recurse(mut path: PathBuf, mut depth: Option<usize>, config: &Paths) -> 
 
     // -l/--link
     if !config.link {
-        let metadata = path.as_path()
+        let metadata = path
+            .as_path()
             .symlink_metadata()
             .map_err(|e| format!("{:?} read without symlink fails: {}", path, e))?;
         if !metadata.is_dir() {
@@ -90,7 +91,8 @@ fn path_recurse(mut path: PathBuf, mut depth: Option<usize>, config: &Paths) -> 
     }
     depth = depth.map(|d| d - 1);
 
-    for entry in path.as_path()
+    for entry in path
+        .as_path()
         .read_dir()
         .map_err(|e| format!("{:?} read fails: {}", path, e.description()))?
     {

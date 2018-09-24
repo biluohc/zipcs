@@ -19,9 +19,7 @@ impl RegexList {
     }
     pub fn find<'a>(&self, msg: &'a str) -> Option<&'a str> {
         // ::1应该是最短的吧?
-        let addrs = msg.split('/')
-            .filter(|s| s.len() >= 3)
-            .collect::<Vec<&str>>();
+        let addrs = msg.split('/').filter(|s| s.len() >= 3).collect::<Vec<&str>>();
         debug!("{:?}", addrs);
 
         for addr in addrs {
@@ -37,15 +35,11 @@ impl RegexList {
     }
     #[allow(dead_code)] // for test
     pub fn find_by_re<'a>(&self, msg: &'a str, idx: usize) -> Option<&'a str> {
-        let addrs = msg.split('/')
-            .filter(|s| s.len() >= 3)
-            .collect::<Vec<&str>>();
+        let addrs = msg.split('/').filter(|s| s.len() >= 3).collect::<Vec<&str>>();
         debug!("{:?}", addrs);
 
         for addr in addrs {
-            let rest = self.0[idx]
-                .find(addr)
-                .map(|mat| &addr[mat.start()..mat.end()]);
+            let rest = self.0[idx].find(addr).map(|mat| &addr[mat.start()..mat.end()]);
             if rest.is_some() {
                 return rest;
             }
@@ -64,7 +58,8 @@ lazy_static! {
             r#"localhost"#,
         ]
     ).unwrap();
-// localhost 如果管前后的字符的话太麻烦了, 不能方便的写成一个 ...
+
+// localhost 如果管前后的字符的话太麻烦了, 不能方便的写成一个, 而且以后可能需要解析 host 文件, 调用 ToSocketAddrs 有违原则...
 // let re = Regex::new(r#"[(.+://)](?P<localhost>(localhost))([:/].*)?"#).unwrap();
 // println!("{:?}",re.captures("http://localhost").and_then(|c|c.name("localhost")));
 
