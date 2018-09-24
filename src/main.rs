@@ -62,19 +62,24 @@ extern crate rayon;
 extern crate regex;
 extern crate reqwest;
 extern crate zip;
+extern crate tokio;
+extern crate tokio_process;
+extern crate futures;
 
 extern crate app;
 #[macro_use]
 extern crate log;
-extern crate mxo_env_logger;
-use mxo_env_logger::init;
+extern crate fern;
+extern crate chrono;
 
-mod coll;
+pub mod args;
+pub mod coll;
 pub mod consts;
-mod args;
+pub mod logger;
+
 use args::Config;
 
 fn main() {
-    init().expect("Init log failed");
+    logger::set(1).expect("Init log failed");
     Config::parse();
 }
