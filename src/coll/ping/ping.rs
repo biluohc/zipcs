@@ -1,12 +1,10 @@
 use chardet::{charset2encoding, detect};
 use encoding::label::encoding_from_whatwg_label;
 use encoding::DecoderTrap;
-use futures::{stream, Future, Stream};
-use tokio::runtime::current_thread;
-use tokio_process::CommandExt;
+use futures::{future::ready, stream::futures_unordered::FuturesUnordered, FutureExt, StreamExt};
+use tokio::{process::Command, runtime::Builder};
 
 use crate::consts::space_fix;
-use std::process::Command;
 use std::process::Output;
 
 #[derive(Debug)]
@@ -32,24 +30,28 @@ impl Pings {
     }
     pub fn call(self) {
         debug!("{:?}", self);
+
+        let mut rt = Builder::new()
+            .basic_scheduler()
+            .enable_all()
+            .build()
+            .expect("tokio runtime build failed");
+
         let host_len_max = self.hosts.as_slice().iter().max_by_key(|p| p.len()).unwrap().len();
 
         // sleep sort
-        let mut futs = Vec::with_capacity(self.hosts.len());
+        let futs = FuturesUnordered::new();
 
         let only_line = self.only_line;
         for host in self.hosts.clone() {
-            let output = ping(&host, &self).output_async();
+            let fut = ping(host, &self, move |output: Output, host: String| {
+                callback(output, host, only_line, host_len_max)
+            });
 
-            let fut = output
-                .map_err(|e| error!("Running ping command failed: {:?}", e))
-                .map(move |output| callback(output, host, only_line, host_len_max));
             futs.push(fut);
         }
 
-        current_thread::block_on_all(stream::futures_unordered(futs.into_iter()).for_each(|_| Ok(())))
-            .map_err(|e| error!("current thread runtime error: {:?}", e))
-            .ok();
+        rt.block_on(futs.for_each(|_| ready(())))
     }
 }
 
@@ -64,7 +66,10 @@ impl Default for Pings {
     }
 }
 
-fn ping(host: &str, config: &Pings) -> Command {
+async fn ping<F>(host: String, config: &Pings, callback: F)
+where
+    F: Fn(Output, String),
+{
     let count_str = format!("{}", config.count);
     let mut args = Vec::new();
     let mut ping = "ping";
@@ -85,11 +90,16 @@ fn ping(host: &str, config: &Pings) -> Command {
     args.push(&count_str);
 
     // host
-    args.push(host);
+    args.push(&host);
 
     let mut cmd = Command::new(ping);
     cmd.args(&args[..]);
-    cmd
+    cmd.output()
+        .map(|res| match res {
+            Ok(output) => callback(output, host),
+            Err(e) => error!("Running ping command failed: {:?}", e),
+        })
+        .await
 }
 
 fn callback(output: Output, host: String, only_line: bool, host_len_max: usize) {

@@ -30,9 +30,8 @@ version = "0.6.5"
 
 [dependencies]
 nonblock-logger = { version = "0.1", features = [ "color" ] }
-futures = "0.1.24"
-tokio = "0.1.8"
-tokio-process = "0.2.2"
+tokio = { version = "0.2.9", features = ["rt-core", "process", "time"] }
+futures = "0.3.2"
 percent-encoding = "1.0"
 lazy_static = "1.1"
 encoding = "0.2.33"
