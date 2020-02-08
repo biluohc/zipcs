@@ -51,20 +51,6 @@ CAMMANDS:
 ## Ps
 * 所依赖的[zip-rs](https://github.com/mvdnes/zip-rs)库目前不支持加密,所以目前不支持密码。
 */
-extern crate chardet;
-extern crate chrono;
-extern crate encoding;
-extern crate filetime;
-extern crate futures;
-extern crate percent_encoding;
-extern crate rayon;
-extern crate regex;
-extern crate reqwest;
-extern crate tokio;
-extern crate tokio_process;
-extern crate zip;
-
-extern crate app;
 #[macro_use]
 extern crate nonblock_logger;
 #[macro_use]

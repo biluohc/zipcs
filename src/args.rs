@@ -1,5 +1,4 @@
-use super::consts::*;
-use coll::*;
+use crate::{coll::*, consts::*};
 
 use app::{args, App, Args, Cmd, Opt, OptTypo, OptValue, OptValueParse};
 

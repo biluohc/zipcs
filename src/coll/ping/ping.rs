@@ -5,7 +5,7 @@ use futures::{stream, Future, Stream};
 use tokio::runtime::current_thread;
 use tokio_process::CommandExt;
 
-use consts::space_fix;
+use crate::consts::space_fix;
 use std::process::Command;
 use std::process::Output;
 
@@ -32,13 +32,7 @@ impl Pings {
     }
     pub fn call(self) {
         debug!("{:?}", self);
-        let host_len_max = self
-            .hosts
-            .as_slice()
-            .iter()
-            .max_by_key(|p| p.len())
-            .unwrap()
-            .len();
+        let host_len_max = self.hosts.as_slice().iter().max_by_key(|p| p.len()).unwrap().len();
 
         // sleep sort
         let mut futs = Vec::with_capacity(self.hosts.len());
@@ -50,14 +44,12 @@ impl Pings {
             let fut = output
                 .map_err(|e| error!("Running ping command failed: {:?}", e))
                 .map(move |output| callback(output, host, only_line, host_len_max));
-                
             futs.push(fut);
         }
 
-        current_thread::block_on_all(
-            stream::futures_unordered(futs.into_iter()).for_each(|_| Ok(())),
-        ).map_err(|e| error!("current thread runtime error: {:?}", e))
-        .ok();
+        current_thread::block_on_all(stream::futures_unordered(futs.into_iter()).for_each(|_| Ok(())))
+            .map_err(|e| error!("current thread runtime error: {:?}", e))
+            .ok();
     }
 }
 
