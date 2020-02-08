@@ -240,19 +240,19 @@ impl<'app, 's: 'app> OptValueParse<'app> for &'s mut CharSet {
         if *count == 0 || typo.is_covered() || typo.is_multiple() {
             match CharSet::new(msg) {
                 Err(_) => {
-                    Err(format!("OPTION(<{}>) parse<CharSet> fails: \"{}\"", opt_name, msg))?;
+                    return Err(format!("OPTION(<{}>) parse<CharSet> fails: \"{}\"", opt_name, msg));
                 }
                 Ok(o) => **self = o,
             }
         } else if typo.is_single() {
-            Err(format!("OPTION(<{}>) can only occurs once, but second: {:?}", opt_name, msg))?;
+            return Err(format!("OPTION(<{}>) can only occurs once, but second: {:?}", opt_name, msg));
         }
         Ok(())
     }
     /// env::arg could is `""`
     fn check(&self, opt_name: &str, optional: &bool, count: &usize, _: &OptTypo) -> Result<(), String> {
         if !optional && *count == 0 && self.default().is_none() {
-            Err(format!("OPTION(<{}>) missing", opt_name))?;
+            return Err(format!("OPTION(<{}>) missing", opt_name));
         }
         Ok(())
     }

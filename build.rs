@@ -32,7 +32,7 @@ fn fun() -> String {
         .unwrap_or_default();
 
     let version = format!("{} ({}{})", env!("CARGO_PKG_VERSION"), git, date_time());
-    format!("pub const VERSION: &'static str = \"{}\";", version)
+    format!("pub const VERSION: &str = \"{}\";", version)
 }
 
 // date --help
@@ -73,5 +73,5 @@ fn decode_utf8_unchecked(bytes: Vec<u8>) -> String {
 fn decode(bytes: &[u8]) -> String {
     encoding_from_whatwg_label(charset2encoding(&detect(bytes).0))
         .and_then(|code| code.decode(bytes, DecoderTrap::Strict).ok())
-        .unwrap_or_else(|| String::from_utf8_lossy(bytes).into_owned().to_owned())
+        .unwrap_or_else(|| String::from_utf8_lossy(bytes).into_owned())
 }

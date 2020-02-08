@@ -1,17 +1,17 @@
 #![allow(unknown_lints, const_static_lifetime)]
 // crate's info
-pub const NAME: &'static str = env!("CARGO_PKG_NAME");
-// pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+pub const NAME: &str = env!("CARGO_PKG_NAME");
+// pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 include!(concat!(env!("OUT_DIR"), "/zipcs.txt"));
-pub const AUTHOR: &'static str = "Wspsxing";
-pub const EMAIL: &'static str = "biluohc@qq.com";
-pub const DESC: &'static str = env!("CARGO_PKG_DESCRIPTION");
+pub const AUTHOR: &str = "Wspsxing";
+pub const EMAIL: &str = "biluohc@qq.com";
+pub const DESC: &str = env!("CARGO_PKG_DESCRIPTION");
 
-pub const URL_NAME: &'static str = "Repo";
-pub const URL: &'static str = "https://github.com/biluohc/zipcs";
+pub const URL_NAME: &str = "Repo";
+pub const URL: &str = "https://github.com/biluohc/zipcs";
 
 // copy form use@line16 ,but BIG5_2003 is swap by big5.
-pub const CHARSETS: &'static str = "UTF_8, UTF_16BE, UTF_16LE, GBK, GB18030, HZ, BIG5...";
+pub const CHARSETS: &str = "UTF_8, UTF_16BE, UTF_16LE, GBK, GB18030, HZ, BIG5...";
 
 pub fn space_fix(msg: &str, msg_len_max: usize) -> String {
     let mut str = msg.to_owned();

@@ -144,10 +144,10 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
         let dir_item = read_dir(&outdir_path)
             .map_err(|e| format!("Reading OutDir({}) occurs error: {}", outdir_path.display(), e.description()))?;
         if dir_item.count() != 0 {
-            Err(format!("OutDir({}) is not empty!", outdir_path.display()))?;
+            return Err(format!("OutDir({}) is not empty!", outdir_path.display()).into());
         }
     } else if outdir_path.exists() && !outdir_path.is_dir() {
-        Err(format!("OutDir({}) is not a Dir!", outdir_path.display()))?;
+        return Err(format!("OutDir({}) is not a Dir!", outdir_path.display()).into());
     } else {
         create_dir_all(outdir_path)?;
     }

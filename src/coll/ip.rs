@@ -4,13 +4,14 @@ use reqwest::{header, Client};
 use crate::consts::basic_runtime;
 use std::time::Duration;
 
-static HOSTS: &'static [&str] = &["https://ip.cn/", "https://myip.ipip.net/", "https://ipinfo.io/"];
+static HOSTS: &[&str] = &["https://ip.cn/", "https://myip.ipip.net/", "https://ipinfo.io/"];
 // curl https://ip.cn -v
-static UA: &'static str = "curl/7.54.0";
-static ACCEPT: &'static str = "Accept: */*";
+static UA: &str = "curl/7.54.0";
+static ACCEPT: &str = "Accept: */*";
 
 pub fn call() {
     let mut rt = basic_runtime();
+
     let mut headers = header::HeaderMap::new();
     headers.insert(header::USER_AGENT, UA.parse().unwrap());
     headers.insert(header::ACCEPT, ACCEPT.parse().unwrap());

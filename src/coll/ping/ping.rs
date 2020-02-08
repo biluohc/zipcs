@@ -183,12 +183,12 @@ fn printf_err(msg: &Output, host: &str, host_len_max: usize) {
 
 // #[cfg(unix)]
 // fn decode(msg: &[u8]) -> String {
-//     String::from_utf8_lossy(msg).into_owned().to_owned()
+//     String::from_utf8_lossy(msg).into_owned()
 // }
 
 // #[cfg(windows)]
 fn decode(bytes: &[u8]) -> String {
     encoding_from_whatwg_label(charset2encoding(&detect(bytes).0))
         .and_then(|code| code.decode(bytes, DecoderTrap::Strict).ok())
-        .unwrap_or_else(|| String::from_utf8_lossy(bytes).into_owned().to_owned())
+        .unwrap_or_else(|| String::from_utf8_lossy(bytes).into_owned())
 }
