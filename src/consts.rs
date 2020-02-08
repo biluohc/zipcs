@@ -1,4 +1,4 @@
-#![allow(unknown_lints,const_static_lifetime)]
+#![allow(unknown_lints, const_static_lifetime)]
 // crate's info
 pub const NAME: &'static str = env!("CARGO_PKG_NAME");
 // pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
@@ -19,6 +19,15 @@ pub fn space_fix(msg: &str, msg_len_max: usize) -> String {
         str += " ";
     }
     str
+}
+
+use tokio::runtime::{Builder, Runtime};
+pub fn basic_runtime() -> Runtime {
+    Builder::new()
+        .basic_scheduler()
+        .enable_all()
+        .build()
+        .expect("tokio runtime build failed")
 }
 
 // https://docs.rs/encoding/0.2.33/encoding/all/index.html

@@ -2,9 +2,9 @@ use chardet::{charset2encoding, detect};
 use encoding::label::encoding_from_whatwg_label;
 use encoding::DecoderTrap;
 use futures::{future::ready, stream::futures_unordered::FuturesUnordered, FutureExt, StreamExt};
-use tokio::{process::Command, runtime::Builder};
+use tokio::process::Command;
 
-use crate::consts::space_fix;
+use crate::consts::{basic_runtime, space_fix};
 use std::process::Output;
 
 #[derive(Debug)]
@@ -31,11 +31,7 @@ impl Pings {
     pub fn call(self) {
         debug!("{:?}", self);
 
-        let mut rt = Builder::new()
-            .basic_scheduler()
-            .enable_all()
-            .build()
-            .expect("tokio runtime build failed");
+        let mut rt = basic_runtime();
 
         let host_len_max = self.hosts.as_slice().iter().max_by_key(|p| p.len()).unwrap().len();
 
