@@ -38,24 +38,29 @@ impl Config {
                                 .short('l')
                                 .long("list")
                                 .help("Only list files from ZipArchives"),
-                        ).opt(
+                        )
+                        .opt(
                             Opt::new("detect", &mut detect)
                                 .short('d')
                                 .long("chardet")
                                 .help("Detect the charset for File's name from ZipArchive"),
-                        ).opt(
+                        )
+                        .opt(
                             Opt::new("charset", &mut config.zip.charset)
                                 .short('c')
                                 .long("charset")
                                 .help(&charsets),
-                        ).opt(
+                        )
+                        .opt(
                             Opt::new("outdir", &mut config.zip.outdir)
                                 .optional()
                                 .short('o')
                                 .long("outdir")
                                 .help("Sets Output directory(default is the name of ZipArchive)"),
-                        ).args(Args::new("ZipArchive", &mut config.zip.zips).help("ZipArchive need to unzip")),
-                ).cmd(
+                        )
+                        .args(Args::new("ZipArchive", &mut config.zip.zips).help("ZipArchive need to unzip")),
+                )
+                .cmd(
                     Cmd::new("path")
                         .short("P")
                         .sort_key("2")
@@ -65,24 +70,29 @@ impl Config {
                                 .short('c')
                                 .long("charset")
                                 .help(&charsets),
-                        ).opt(
+                        )
+                        .opt(
                             Opt::new("depth", &mut config.path.depth)
                                 .optional()
                                 .short('d')
                                 .long("depth")
                                 .help("decode paths recursively depth(default without limit)"),
-                        ).opt(
+                        )
+                        .opt(
                             Opt::new("store", &mut config.path.store)
                                 .short('s')
                                 .long("store")
                                 .help("store result by rename"),
-                        ).opt(
+                        )
+                        .opt(
                             Opt::new("link", &mut config.path.link)
                                 .short('l')
                                 .long("link")
                                 .help("follow symbolic links"),
-                        ).args(Args::new("Path", &mut config.path.strs).help("Path need to decode")),
-                ).cmd(
+                        )
+                        .args(Args::new("Path", &mut config.path.strs).help("Path need to decode")),
+                )
+                .cmd(
                     Cmd::new("file")
                         .short("f")
                         .sort_key("3")
@@ -92,18 +102,22 @@ impl Config {
                                 .short('c')
                                 .long("charset")
                                 .help(&charsets),
-                        ).opt(
+                        )
+                        .opt(
                             Opt::new("charset_out", &mut config.file.charset_out)
                                 .short('C')
                                 .long("charset-out")
                                 .help("charset output(encode) using"),
-                        ).opt(
+                        )
+                        .opt(
                             Opt::new("store", &mut config.file.store)
                                 .short('s')
                                 .long("store")
                                 .help("store result by rewrite"),
-                        ).args(Args::new("File", &mut config.file.strs).help("File need to encode/decode")),
-                ).cmd(
+                        )
+                        .args(Args::new("File", &mut config.file.strs).help("File need to encode/decode")),
+                )
+                .cmd(
                     Cmd::new("ping")
                         .short("p")
                         .sort_key("4")
@@ -113,25 +127,30 @@ impl Config {
                                 .short('c')
                                 .long("count")
                                 .help("stop after sending count ECHO_REQUEST packets"),
-                        ).opt(Opt::new("_6", &mut config.ping.v6).short('6').help("use IPV6"))
+                        )
+                        .opt(Opt::new("_6", &mut config.ping.v6).short('6').help("use IPV6"))
                         .opt(
                             Opt::new("only-line", &mut config.ping.only_line)
                                 .short('l')
                                 .long("only-line")
                                 .help("print result only-line"),
-                        ).args(Args::new("Host/IP", &mut config.ping.hosts).help("Host or IP need to ping")),
-                ).cmd(
+                        )
+                        .args(Args::new("Host/IP", &mut config.ping.hosts).help("Host or IP need to ping")),
+                )
+                .cmd(
                     Cmd::new("chardet")
                         .short("c")
                         .sort_key("5")
                         .desc("Detect the charset for File(for reference)")
                         .args(args("File", &mut config.chardet.files, "The file need to detect charset")),
-                ).cmd(
+                )
+                .cmd(
                     Cmd::new("charset")
                         .short("C")
                         .sort_key("50")
                         .desc("Show all CharSet supported"),
-                ).cmd(Cmd::new("ip").short("i").sort_key("6").desc("Get ip address"))
+                )
+                .cmd(Cmd::new("ip").short("i").sort_key("6").desc("Get ip address"))
                 .cmd(
                     Cmd::new("url")
                         .short("u")
@@ -142,13 +161,16 @@ impl Config {
                                 .short('e')
                                 .long("encode")
                                 .help("encode(default is decode)"),
-                        ).opt(
+                        )
+                        .opt(
                             Opt::new("all", &mut config.url.encode_all_chars)
                                 .short('a')
                                 .long("all")
                                 .help("encode all chars expect '/'"),
-                        ).args(Args::new("Url", &mut config.url.strs).help("Url need to decode/encode")),
-                ).parse_args()
+                        )
+                        .args(Args::new("Url", &mut config.url.strs).help("Url need to decode/encode")),
+                )
+                .parse_args()
         };
         if helper.current_cmd_str() == Some("zip") {
             if list && detect {

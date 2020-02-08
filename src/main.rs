@@ -4,15 +4,15 @@
 ## Usage
 
 ```sh
- cargo install --git https://github.com/biluohc/zipcs 
+ cargo install --git https://github.com/biluohc/zipcs
  zcs -h
 ```
 
 ## Or
 
 ```sh
-git clone https://github.com/biluohc/zipcs  
-cd zipcs 
+git clone https://github.com/biluohc/zipcs
+cd zipcs
 cargo build --release
 
 ./target/release/zcs --help
@@ -26,7 +26,7 @@ Wspsxing <biluohc@qq.com>
 Repo: https://github.com/biluohc/zipcs
 
 USAGE:
-   zcs options 
+   zcs options
    zcs <command> [args]
 
 OPTIONS:
@@ -46,17 +46,15 @@ CAMMANDS:
 
 ## Binary
 
-* [The Release Page](https://github.com/biluohc/zipcs/releases)  
+* [The Release Page](https://github.com/biluohc/zipcs/releases)
 
 ## Ps
 * 所依赖的[zip-rs](https://github.com/mvdnes/zip-rs)库目前不支持加密,所以目前不支持密码。
 */
-
 extern crate chardet;
+extern crate chrono;
 extern crate encoding;
 extern crate filetime;
-#[macro_use]
-extern crate lazy_static;
 extern crate futures;
 extern crate percent_encoding;
 extern crate rayon;
@@ -68,9 +66,9 @@ extern crate zip;
 
 extern crate app;
 #[macro_use]
-extern crate log;
-extern crate chrono;
-extern crate fern;
+extern crate nonblock_logger;
+#[macro_use]
+extern crate lazy_static;
 
 pub mod args;
 pub mod coll;
@@ -80,6 +78,6 @@ pub mod logger;
 use args::Config;
 
 fn main() {
-    logger::set(1).expect("Init log failed");
+    let _handle = logger::logger_init(1);
     Config::parse();
 }

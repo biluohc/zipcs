@@ -3,6 +3,7 @@ name = "zcs"
 version = "0.3.6"
 authors = ["Wspsxing <biluohc@qq.com>"]
 description = "Useful tools collection."
+# edition = "2018"
 repository = "https://github.com/biluohc/zipcs"
 # documentation = "https://docs.rs/zipcs/"
 readme = "readme.md"
@@ -16,26 +17,9 @@ lto = true
 # debug = true 
 
 [build-dependencies]
-encoding = "^0.2"
-chardet = "^0.2"
-time = "^0.1"
-
-[dependencies]
-fern = { version = "0.5.6", features = ["colored"] }
-futures = "^0.1.24"
-tokio = "^0.1.8"
-tokio-process = "^0.2.2"
-percent-encoding = "^1.0"
-lazy_static = "^1.1"
-encoding = "^0.2.33"
-filetime = "^0.2.1"
-reqwest = "^0.9.1"
-chardet = "^0.2.3"
-chrono = "^0.4.6"
-regex = "^1.0.5"
-rayon = "^1.0"
-zip = "^0.4.2"
-log = "^0.4.5"
+encoding = "0.2"
+chardet = "0.2"
+time = "0.1"
 
 [dependencies.app]
 version = "0.6.5"
@@ -44,3 +28,18 @@ version = "0.6.5"
 # branch = "master" 
 # commit = ""
 
+[dependencies]
+nonblock-logger = { version = "0.1", features = [ "color" ] }
+futures = "0.1.24"
+tokio = "0.1.8"
+tokio-process = "0.2.2"
+percent-encoding = "1.0"
+lazy_static = "1.1"
+encoding = "0.2.33"
+filetime = "0.2.1"
+reqwest = "0.9.1"
+chardet = "0.2.3"
+chrono = "0.4.6"
+regex = "1.0.5"
+rayon = "1.0"
+zip = "0.4.2"
