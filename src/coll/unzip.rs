@@ -188,36 +188,38 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
             copy(&mut file, &mut outfile)?;
         }
         // Get/Set m/atime
-        #[allow(unused_must_use)]
         {
-            let tm = file.last_modified().to_timespec();
+            let tm = file.last_modified().to_time().to_timespec();
             let tm = FileTime::from_unix_time(tm.sec, tm.nsec as u32);
-            set_symlink_file_times(&path, tm, tm).map_err(|e| {
-                eprintln!(
-                    "filetime::set_symlink_file_times({}, {:?}) occurs error: {}",
-                    path.as_path().display(),
-                    tm,
-                    e.description()
-                )
-            });
+            set_symlink_file_times(&path, tm, tm)
+                .map_err(|e| {
+                    eprintln!(
+                        "filetime::set_symlink_file_times({}, {:?}) occurs error: {}",
+                        path.as_path().display(),
+                        tm,
+                        e.description()
+                    )
+                })
+                .ok();
         }
 
         // Get/Set permissions
-        #[allow(unused_must_use)]
         #[cfg(unix)]
         {
             use std::fs::{set_permissions, Permissions};
             use std::os::unix::fs::PermissionsExt;
 
             if let Some(mode) = file.unix_mode() {
-                set_permissions(&path, Permissions::from_mode(mode)).map_err(|e| {
-                    eprintln!(
-                        "fs::set_permissions({}, {:?}) occurs error: {}",
-                        path.as_path().display(),
-                        mode,
-                        e.description()
-                    )
-                });
+                set_permissions(&path, Permissions::from_mode(mode))
+                    .map_err(|e| {
+                        eprintln!(
+                            "fs::set_permissions({}, {:?}) occurs error: {}",
+                            path.as_path().display(),
+                            mode,
+                            e.description()
+                        )
+                    })
+                    .ok();
             }
         }
     }
