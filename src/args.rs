@@ -57,6 +57,13 @@ impl Config {
                                 .long("outdir")
                                 .help("Sets Output directory(default is the name of ZipArchive)"),
                         )
+                        .opt(
+                            Opt::new("password", &mut config.zip.password)
+                                .optional()
+                                .short('p')
+                                .long("password")
+                                .help("Sets password"),
+                        )
                         .args(Args::new("ZipArchive", &mut config.zip.zips).help("ZipArchive need to unzip")),
                 )
                 .cmd(

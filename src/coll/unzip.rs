@@ -4,6 +4,7 @@ use chardet::{charset2encoding, detect};
 use encoding::label::encoding_from_whatwg_label;
 use encoding::DecoderTrap;
 use filetime::{set_symlink_file_times, FileTime};
+use futures::TryFutureExt;
 use zip::read::ZipArchive;
 use zip::result::ZipError;
 // https://docs.rs/filetime/ not follow symlink?
@@ -30,10 +31,11 @@ impl Default for Task {
 
 #[derive(Debug, Default)]
 pub struct Zips {
-    pub charset: CharSet,  //zip -cs/--charset   //utf-8
-    pub outdir: String,    //zipcs -o/--outdir   //./
-    pub zips: Vec<String>, //zipcs ZipArchive0 ZipArchive1 ...
-    pub task: Task,        // UNZIP
+    pub charset: CharSet,         //zip -cs/--charset   //utf-8
+    pub outdir: String,           //zipcs -o/--outdir   //./
+    pub password: Option<String>, //zipcs -p/--password
+    pub zips: Vec<String>,        //zipcs ZipArchive0 ZipArchive1 ...
+    pub task: Task,               // UNZIP
 }
 impl Zips {
     pub fn check_fix(&mut self) -> Result<(), String> {
@@ -68,6 +70,9 @@ impl Zips {
     pub fn zips(&self) -> &[String] {
         self.zips.as_slice()
     }
+    pub fn password(&self) -> Option<&str> {
+        self.password.as_ref().map(|s| s.as_str())
+    }
     pub fn task(&self) -> &Task {
         &self.task
     }
@@ -79,10 +84,24 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
     let reader = BufReader::new(zip_arch);
     let mut zip_arch = ZipArchive::new(reader)?;
 
+    macro_rules!  zip_arch_by_index {
+        ($i: ident) => {
+            if let Some(pw) = config.password() {
+                match zip_arch.by_index_decrypt($i, pw.as_bytes()) {
+                    Ok(Ok(o)) => Ok(o),
+                    Err(e) => Err(e),
+                    Ok(Err(e)) => return Err(ZipCSError::Desc(e.to_string())),
+                }
+            } else {
+                zip_arch.by_index($i)
+            }
+        };
+    }
+
     // LIST
     if *config.task() == Task::List {
         for i in 0..zip_arch.len() {
-            let file = match zip_arch.by_index(i) {
+            let file = match zip_arch_by_index!(i) {
                 Ok(o) => o,
                 Err(e) => {
                     eprintln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
@@ -108,7 +127,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
     // Chardet
     if *config.task() == Task::Chardet {
         for i in 0..zip_arch.len() {
-            let file = match zip_arch.by_index(i) {
+            let file = match zip_arch_by_index!(i) {
                 Ok(o) => o,
                 Err(e) => {
                     eprintln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
@@ -153,7 +172,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
     }
 
     for i in 0..zip_arch.len() {
-        let mut file = match zip_arch.by_index(i) {
+        let mut file = match zip_arch_by_index!(i) {
             Ok(o) => o,
             Err(e) => {
                 eprintln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
