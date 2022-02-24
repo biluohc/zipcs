@@ -18,7 +18,7 @@ impl Pings {
     pub fn check_fix(&mut self) -> Result<(), String> {
         let mut vs = Vec::new();
         for arg in &self.hosts {
-            let addr = if self.v6 { RE6.find(arg) } else { RE.find(arg) };
+            let addr = RE.find(arg).or_else(|| RE6.find(arg));
             if addr.is_none() {
                 return Err(format!("ARG is't contains reachable domain/ip: {:?} ", arg));
             }
