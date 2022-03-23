@@ -4,9 +4,17 @@ use reqwest::{header, Client};
 use crate::consts::basic_runtime;
 use std::time::Duration;
 
-static HOSTS: &[&str] = &["https://myip.ipip.net/", "https://ipinfo.io/", "https://checkip.amazonaws.com"];
-// curl https://ip.cn -v
-static UA: &str = "curl/7.54.0";
+
+static HOSTS: &[&str] = &[
+    "https://myip.ipip.net",
+    "https://ipinfo.io",
+    "https://api.ip.sb/ip",
+    "https://checkip.amazonaws.com",
+];
+
+// curl ip.sb -v
+// curl https://api.ip.sb/geoip/185.222.222.222 
+static UA: &str = "curl/7.81.0";
 static ACCEPT: &str = "Accept: */*";
 
 pub fn call() {
