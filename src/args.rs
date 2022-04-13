@@ -161,7 +161,7 @@ impl Config {
                     Cmd::new("ip")
                         .short("i")
                         .sort_key("6")
-                        .desc("Get ip address")
+                        .desc("Get ip address and it's location")
                         .args(Args::new("Ip", &mut config.ips).optional().help("ip need to geo")),
                 )
                 .cmd(
