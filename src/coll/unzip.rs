@@ -4,7 +4,6 @@ use chardet::{charset2encoding, detect};
 use encoding::label::encoding_from_whatwg_label;
 use encoding::DecoderTrap;
 use filetime::{set_symlink_file_times, FileTime};
-use futures::TryFutureExt;
 use zip::read::ZipArchive;
 use zip::result::ZipError;
 // https://docs.rs/filetime/ not follow symlink?

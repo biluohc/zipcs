@@ -10,6 +10,7 @@ pub struct Config {
     path: Paths,
     file: Files,
     chardet: CharDet,
+    ips: Ips,
 }
 
 impl Config {
@@ -156,7 +157,13 @@ impl Config {
                         .sort_key("50")
                         .desc("Show all CharSet supported"),
                 )
-                .cmd(Cmd::new("ip").short("i").sort_key("6").desc("Get ip address"))
+                .cmd(
+                    Cmd::new("ip")
+                        .short("i")
+                        .sort_key("6")
+                        .desc("Get ip address")
+                        .args(Args::new("Ip", &mut config.ips).optional().help("ip need to geo")),
+                )
                 .cmd(
                     Cmd::new("url")
                         .short("u")
@@ -224,7 +231,7 @@ impl Config {
                 self.file.call();
             }
             Some("ip") => {
-                call();
+                call(self.ips);
             }
             _ => unreachable!(),
         }
