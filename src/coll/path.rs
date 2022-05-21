@@ -1,7 +1,6 @@
 use super::consts::*;
 
 use std::borrow::Cow;
-use std::error::Error;
 use std::ffi::OsStr;
 use std::fs::rename;
 #[cfg(unix)]
@@ -61,7 +60,7 @@ fn path_recurse(mut path: PathBuf, mut depth: Option<usize>, config: &Paths) -> 
                 path_new.push(&file_name);
                 println!("{:?}", path_new);
                 if config.store && ne(&file_name, os_str) {
-                    rename(&path, &path_new).map_err(|e| format!("rename fails: {}: {:?}", e.description(), path))?;
+                    rename(&path, &path_new).map_err(|e| format!("rename fails: {}: {:?}", e, path))?;
                     path = path_new;
                 }
             }
@@ -94,9 +93,9 @@ fn path_recurse(mut path: PathBuf, mut depth: Option<usize>, config: &Paths) -> 
     for entry in path
         .as_path()
         .read_dir()
-        .map_err(|e| format!("{:?} read fails: {}", path, e.description()))?
+        .map_err(|e| format!("{:?} read fails: {}", path, e))?
     {
-        let entry = entry.map_err(|ref e| format!("{:?}'s entry read fails: {}", path, e.description()))?;
+        let entry = entry.map_err(|ref e| format!("{:?}'s entry read fails: {}", path, e))?;
         debug!("{:?}", entry.path());
         path_recurse(entry.path(), depth, config)?;
     }

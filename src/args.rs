@@ -206,7 +206,7 @@ impl Config {
         match cmd {
             Some("zip") => {
                 self.zip.check_fix()?;
-                self.zip.call()?;
+                self.zip.call();
             }
             Some("ping") => {
                 self.ping.check_fix()?;

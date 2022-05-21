@@ -46,19 +46,18 @@ impl Zips {
             } else if path.is_dir() {
                 return Err(format!("Arguments({}): \"{:?}\" is a directory", name, path));
             }
-            File::open(path).map_err(|e| format!("Arguments({}): \"{:?}\" is invalid({})", name, path, e.description()))?;
+            File::open(path).map_err(|e| format!("Arguments({}): \"{:?}\" is invalid({})", name, path, e))?;
         }
         Ok(())
     }
-    pub fn call(self) -> Result<(), String> {
+    pub fn call(self) {
         debug!("Config_zip: {:?}", self);
 
         for zip_arch_path in self.zips() {
             if let Err(e) = for_zip_arch_file(zip_arch_path, &self) {
-                return Err(format!("{:?} -> {:?}", zip_arch_path, e));
+                error!("{:?} -> {}", zip_arch_path, e);
             }
         }
-        Ok(())
     }
     pub fn charset(&self) -> &CharSet {
         &self.charset
@@ -83,24 +82,10 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
     let reader = BufReader::new(zip_arch);
     let mut zip_arch = ZipArchive::new(reader)?;
 
-    macro_rules!  zip_arch_by_index {
-        ($i: ident) => {
-            if let Some(pw) = config.password() {
-                match zip_arch.by_index_decrypt($i, pw.as_bytes()) {
-                    Ok(Ok(o)) => Ok(o),
-                    Err(e) => Err(e),
-                    Ok(Err(e)) => return Err(ZipCSError::Desc(e.to_string())),
-                }
-            } else {
-                zip_arch.by_index($i)
-            }
-        };
-    }
-
     // LIST
     if *config.task() == Task::List {
         for i in 0..zip_arch.len() {
-            let file = match zip_arch_by_index!(i) {
+            let file = match zip_arch.by_index_raw(i) {
                 Ok(o) => o,
                 Err(e) => {
                     eprintln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
@@ -126,7 +111,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
     // Chardet
     if *config.task() == Task::Chardet {
         for i in 0..zip_arch.len() {
-            let file = match zip_arch_by_index!(i) {
+            let file = match zip_arch.by_index_raw(i) {
                 Ok(o) => o,
                 Err(e) => {
                     eprintln!("{}_Error: {:?}${:?} ->{:?}", NAME, zip_arch_path, i, e);
@@ -159,8 +144,8 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
     // Check and create oudir
     let outdir_path = Path::new(&outdir);
     if outdir_path.exists() && outdir_path.is_dir() {
-        let dir_item = read_dir(&outdir_path)
-            .map_err(|e| format!("Reading OutDir({}) occurs error: {}", outdir_path.display(), e.description()))?;
+        let dir_item =
+            read_dir(&outdir_path).map_err(|e| format!("Reading OutDir({}) occurs error: {}", outdir_path.display(), e))?;
         if dir_item.count() != 0 {
             return Err(format!("OutDir({}) is not empty!", outdir_path.display()).into());
         }
@@ -168,6 +153,20 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
         return Err(format!("OutDir({}) is not a Dir!", outdir_path.display()).into());
     } else {
         create_dir_all(outdir_path)?;
+    }
+
+    macro_rules!  zip_arch_by_index {
+        ($i: ident) => {
+            if let Some(pw) = config.password() {
+                match zip_arch.by_index_decrypt($i, pw.as_bytes()) {
+                    Ok(Ok(o)) => Ok(o),
+                    Err(e) => Err(e),
+                    Ok(Err(e)) => return Err(ZipCSError::Desc(e.to_string())),
+                }
+            } else {
+                zip_arch.by_index($i)
+            }
+        };
     }
 
     for i in 0..zip_arch.len() {
@@ -205,20 +204,17 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
             let mut outfile = File::create(&path)?;
             copy(&mut file, &mut outfile)?;
         }
+
+        let path_display = path.as_path().display();
         // Get/Set m/atime
-        {
-            let tm = file.last_modified().to_time().to_timespec();
-            let tm = FileTime::from_unix_time(tm.sec, tm.nsec as u32);
-            set_symlink_file_times(&path, tm, tm)
-                .map_err(|e| {
-                    eprintln!(
-                        "filetime::set_symlink_file_times({}, {:?}) occurs error: {}",
-                        path.as_path().display(),
-                        tm,
-                        e.description()
-                    )
-                })
-                .ok();
+        match file.last_modified().to_time() {
+            Err(e) => error!("{} last_modified().to_time() failed: {}", path_display, e),
+            Ok(tm) => {
+                let tm = FileTime::from_unix_time(tm.unix_timestamp(), tm.nanosecond());
+                set_symlink_file_times(&path, tm, tm)
+                    .map_err(|e| eprintln!("filetime::set_symlink_file_times({}, {:?}) failed: {}", path_display, tm, e))
+                    .ok();
+            }
         }
 
         // Get/Set permissions
@@ -229,14 +225,7 @@ fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSErro
 
             if let Some(mode) = file.unix_mode() {
                 set_permissions(&path, Permissions::from_mode(mode))
-                    .map_err(|e| {
-                        eprintln!(
-                            "fs::set_permissions({}, {:?}) occurs error: {}",
-                            path.as_path().display(),
-                            mode,
-                            e.description()
-                        )
-                    })
+                    .map_err(|e| eprintln!("fs::set_permissions({}, {:?}) occurs error: {}", path_display, mode, e))
                     .ok();
             }
         }
@@ -252,11 +241,11 @@ enum ZipCSError {
 }
 
 impl std::error::Error for ZipCSError {
-    fn description(&self) -> &str {
-        match *self {
-            ZipCSError::IO(ref e) => e.description(),
-            ZipCSError::ZIP(ref e) => e.description(),
-            ZipCSError::Desc(ref e) => e.as_str(),
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            ZipCSError::IO(e) => Some(e),
+            ZipCSError::ZIP(ref e) => Some(e),
+            _ => None,
         }
     }
 }
@@ -266,9 +255,14 @@ use std::fmt::Formatter;
 
 impl fmt::Display for ZipCSError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{}", self)
+        match self {
+            ZipCSError::IO(e) => e.fmt(f),
+            ZipCSError::ZIP(e) => e.fmt(f),
+            ZipCSError::Desc(e) => e.fmt(f),
+        }
     }
 }
+
 impl From<std::io::Error> for ZipCSError {
     fn from(e: std::io::Error) -> Self {
         ZipCSError::IO(e)
