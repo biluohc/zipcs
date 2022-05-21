@@ -13,7 +13,7 @@ use std::error::Error;
 use std::ffi::OsString;
 use std::fs::read_dir;
 use std::fs::{create_dir_all, File};
-use std::io::{copy, BufReader};
+use std::io::copy;
 use std::path::Path;
 
 #[derive(Debug, PartialEq)]
@@ -79,8 +79,9 @@ impl Zips {
 fn for_zip_arch_file(zip_arch_path: &str, config: &Zips) -> Result<(), ZipCSError> {
     let zip_arch_path_ = Path::new(zip_arch_path);
     let zip_arch = File::open(zip_arch_path)?;
-    let reader = BufReader::new(zip_arch);
-    let mut zip_arch = ZipArchive::new(reader)?;
+    // Use BufReader read encrypt zip has error: corrupt deflate stream: https://github.com/zip-rs/zip/issues/280
+    // let reader = BufReader::new(zip_arch);
+    let mut zip_arch = ZipArchive::new(zip_arch)?;
 
     // LIST
     if *config.task() == Task::List {
