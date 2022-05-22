@@ -1,0 +1,53 @@
+name: Release
+
+# https://github.com/rust-build/rust-build.action
+# https://github.com/taiki-e/upload-rust-binary-action#example-workflow-basic-usage
+
+on:
+  push:
+    tags:
+      - v[0-9]+.*
+
+jobs:
+  create-release:
+    if: github.repository_owner == 'biluohc'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: taiki-e/create-gh-release-action@v1
+        # with:
+        # (optional)
+        # changelog: CHANGELOG.md
+        env:
+          # (required)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-assets:
+    if: github.repository_owner == 'biluohc'
+    needs:
+      - create-release
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - target: x86_64-unknown-linux-musl
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: taiki-e/github-actions/install-rust@main
+        with:
+          toolchain: stable
+      - uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: zcs
+          target: ${{ matrix.target }}
+          # tar: all #unix
+          zip: all #windows
+          archive: $bin-$tag-$target
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_PROFILE_RELEASE_LTO: true

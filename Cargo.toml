@@ -1,6 +1,6 @@
 [package]
 name = "zcs"
-version = "0.3.8"
+version = "0.3.9"
 authors = ["Wspsxing <biluohc@qq.com>"]
 description = "Useful tools collection."
 edition = "2018"
