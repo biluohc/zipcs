@@ -45,7 +45,7 @@ jobs:
         with:
           bin: zcs
           target: ${{ matrix.target }}
-          # tar: all #unix
+          tar: none #unix
           zip: all #windows
           archive: $bin-$tag-$target
         env:
