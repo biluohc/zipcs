@@ -27,7 +27,6 @@ fn fun() -> String {
         .map(|s| format!(" rustc{}", s.split(' ').nth(1).unwrap()))
         .unwrap_or_default();
     let git = commit_hash()
-        .map(|s| (&s[0..8]).to_string())
         .and_then(|s| branch_name().map(|b| format!("{}@{}{} ", s, b, rustc)))
         .unwrap_or_default();
 
@@ -44,11 +43,12 @@ fn date_time() -> String {
         .unwrap_or_default()
 }
 
+// git describe --always --abbrev=10 --dirty=-modified
 fn commit_hash() -> io::Result<String> {
     Cmd::new("git")
-        .args(&["rev-parse", "HEAD"])
+        .args(&["describe", "--always", "--abbrev=8", "--dirty=-modified"])
         .output()
-        .map(|o| decode_utf8_unchecked(o.stdout))
+        .map(|o| decode(&o.stdout))
         .map(|s| s.trim().to_string())
 }
 
