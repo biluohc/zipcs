@@ -1,5 +1,7 @@
 pub use ac_derive::Ac;
-use std::sync::atomic::{AtomicU16, AtomicU32, AtomicU64, AtomicU8, AtomicUsize, Ordering};
+
+mod defer;
+pub use defer::{defer, Take, TakedDefer};
 
 // #[derive(Debug)]
 // pub struct Counter(AtomicUsize, usize);
@@ -21,6 +23,8 @@ use std::sync::atomic::{AtomicU16, AtomicU32, AtomicU64, AtomicU8, AtomicUsize, 
 //         self.0.load(Ordering::Relaxed)
 //     }
 // }
+
+use std::sync::atomic::{AtomicU16, AtomicU32, AtomicU64, AtomicU8, AtomicUsize, Ordering};
 
 // #[macro_export]
 macro_rules! ac {
