@@ -41,7 +41,7 @@ macro_rules! ac {
             pub fn clear(&self) -> $n {
                 self.0.swap(self.1, Ordering::SeqCst)
             }
-            pub fn get(&self) -> $n {
+            pub fn load(&self) -> $n {
                 self.0.load(Ordering::Relaxed)
             }
         }
