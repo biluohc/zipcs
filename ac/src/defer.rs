@@ -59,7 +59,8 @@ fn test_defer_output() {
 
     {
         let mut _d = defer(i);
-        (_d.take().unwrap())();
+        assert_eq!((_d.take().unwrap())(), 1);
+        assert_eq!(l(), 2);
     }
     assert_eq!(l(), 2);
 }
