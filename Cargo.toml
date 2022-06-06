@@ -1,4 +1,5 @@
 [workspace]
+default-run = "ac-example"
 members = [
   "ac",
   "ac-example",

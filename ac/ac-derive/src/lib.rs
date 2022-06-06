@@ -7,7 +7,7 @@ use crate::proc_macro::TokenStream;
 use proc_macro2::{Ident, Span, TokenStream as TokenStream2};
 
 use darling::FromField;
-use heck::{ShoutySnakeCase, SnakeCase};
+use heck::{ToShoutySnakeCase, ToSnakeCase};
 use quote::{quote, ToTokens};
 use syn::{Data, Field};
 
