@@ -4,3 +4,4 @@
 *main.html
 *.exe
 zipcs
+Cargo.lock
