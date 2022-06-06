@@ -1,0 +1,6 @@
+*.o
+*.bk
+*target
+*main.html
+*.exe
+zipcs

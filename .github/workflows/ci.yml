@@ -1,0 +1,35 @@
+name: ci
+
+on: [push, pull_request]
+
+# https://github.com/actions-rs/toolchain#profiles
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          # - beta
+          # - nightly
+          # - 1.31.0  # MSRV
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+          components: rustfmt #, clippy
+      - name: Show
+        run: rustup show
+      - name: fmt
+        run: cargo fmt --check
+      - name: Build
+        run: cargo build --release
+      - name: Run
+        run: cargo run --release -- -h
+      - name: Tests
+        run: cargo test --verbose --release
